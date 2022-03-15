@@ -23,14 +23,19 @@ fn main() {
 
     let world = HitableList {
         list: vec![
-            Box::new(Sphere {
-                center: Vec3::new(0.0, 0.0, -1.0),
-                radius: 0.5,
-            }),
             // Box::new(Sphere {
-            //     center: Vec3::new(0.0, -100.5, -1.0),
-            //     radius: 100.0,
+            //     center: Vec3::new(0.0, 0.0, -1.0),
+            //     radius: 0.5,
             // }),
+            Box::new(Triangle(
+                Vec3::new(0.0, 0.0, -1.0),
+                Vec3::new(0.2, 0.1, -1.0),
+                Vec3::new(-0.2, 0.2, -1.0),
+            )),
+            Box::new(Sphere {
+                center: Vec3::new(0.0, -100.5, -1.0),
+                radius: 100.0,
+            }),
         ],
     };
 
