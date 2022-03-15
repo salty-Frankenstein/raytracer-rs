@@ -4,6 +4,6 @@ release:
 debug:
 	cargo build
 rd:
-	./target/debug/main
-run:
-	./target/release/main
+	./target/debug/main | convert - output/out.jpg
+rr:
+	./target/release/main | convert - output/out.jpg
