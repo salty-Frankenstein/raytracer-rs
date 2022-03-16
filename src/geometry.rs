@@ -36,8 +36,10 @@ impl Hitable for Triangle {
         if v < 0.0 || u + v > 1.0 {
             return None;
         }
-
         let t = inv_det * _Q.dot(_E2);
+        if t - 0.0 < f32::EPSILON  {
+            return None;
+        }
         Some(HitRecord {
             t: t,
             p: r.point_at_parameter(t), // TODO

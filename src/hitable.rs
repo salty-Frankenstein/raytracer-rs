@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::*;
+use crate::light::*;
 
 #[derive(Clone)]
 pub struct HitRecord {
