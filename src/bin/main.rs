@@ -1,13 +1,15 @@
-use ray_tracer::hitable::*;
 use ray_tracer::geometry::*;
+use ray_tracer::hitable::*;
+use ray_tracer::obj_loader::*;
 use ray_tracer::ray::*;
 use ray_tracer::*;
-use ray_tracer::obj_loader::*;
+use std::fs::File;
+use std::io::*;
 
-const NX: i32 = 200;
-const NY: i32 = 100;
+const NX: i32 = 400;
+const NY: i32 = 400;
 
-fn color(r: &Ray, world: &HitableList) -> Color {
+fn color(r: &Ray, world: &dyn Hitable) -> Color {
     if let Some(rec) = world.hit(r, 0.0, 10000000.0) {
         0.5 * Vec3::new(rec.normal.x + 1.0, rec.normal.y + 1.0, rec.normal.z + 1.0)
     } else {
@@ -15,13 +17,11 @@ fn color(r: &Ray, world: &HitableList) -> Color {
     }
 }
 
-
 fn main() -> obj::ObjResult<()> {
-    println!("P3\n{} {}\n255", NX, NY);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
+    let origin = Pt3::new(0.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let horizontal = Vec3::new(4.0, 0.0, 0.0);
-    let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
+    let horizontal = Vec3::new(2.0, 0.0, 0.0);
+    let lower_left_corner = Vec3::new(-1.0, -1.0, -1.0);
 
     // let world = HitableList {
     //     list: vec![
@@ -41,8 +41,13 @@ fn main() -> obj::ObjResult<()> {
     //     ],
     // };
 
-    let world = load_obj_file(String::from("./input/miku.obj"))?;
+    let mut miku = load_obj_file(String::from("./input/miku.obj"))?;
+    miku.scale(1.25);
+    miku.rotate(-90.0, 0.0, -5.0);
+    miku.displacement(Vec3::new(40.0,-50.0,-130.0));
+    let mut output = File::create("./output/out.ppm")?;
 
+    writeln!(&mut output, "P3\n{} {}\n255", NX, NY)?;
     for j in (0..NY).rev() {
         for i in 0..NX {
             let u = i as f32 / NX as f32;
@@ -51,11 +56,11 @@ fn main() -> obj::ObjResult<()> {
                 o: origin,
                 d: lower_left_corner + u * horizontal + v * vertical,
             };
-            let col = color(&r, &world);
+            let col = color(&r, &miku);
             let ir = (255.99 * col.x) as i32;
             let ig = (255.99 * col.y) as i32;
             let ib = (255.99 * col.z) as i32;
-            println!("{} {} {}", ir, ig, ib);
+            writeln!(&mut output, "{} {} {}", ir, ig, ib)?;
         }
     }
     Ok(())

@@ -4,6 +4,10 @@ release:
 debug:
 	cargo build
 rd:
-	./target/debug/main | convert - output/out.jpg
+	./target/debug/main 
+	convert ./output/out.ppm ./output/out.jpg
 rr:
-	./target/release/main | convert - output/out.jpg
+	./target/release/main
+	convert ./output/out.ppm ./output/out.jpg
+save:
+	cp ./output/out.jpg ./output/$(FILENAME).jpg

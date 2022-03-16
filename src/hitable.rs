@@ -1,16 +1,16 @@
 use crate::ray::Ray;
-use crate::Vec3;
+use crate::*;
 
 #[derive(Clone)]
 pub struct HitRecord {
     pub t: f32,
-    pub p: Vec3,
+    pub p: Pt3,
     pub normal: Vec3,
 }
 
 pub const EMPTY_REC: HitRecord = HitRecord {
     t: 0.0,
-    p: Vec3::new(0.0, 0.0, 0.0),
+    p: Pt3::new(0.0, 0.0, 0.0),
     normal: Vec3::new(0.0, 0.0, 0.0),
 };
 

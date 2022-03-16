@@ -1,10 +1,9 @@
 use crate::hitable::*;
 use crate::ray::Ray;
-use crate::Vec3;
+use crate::*;
 use cgmath::prelude::*;
-pub type Vertex = Vec3;
 
-pub struct Triangle(pub Vertex, pub Vertex, pub Vertex);
+pub struct Triangle(pub Pt3, pub Pt3, pub Pt3);
 
 impl Triangle {
     /// return the normal vector of the triangle
@@ -58,7 +57,7 @@ impl Hitable for Sphere {
         let oc = r.o - self.center;
         let a = r.d.dot(r.d);
         let b = oc.dot(r.d);
-        let c = oc.dot(oc) - self.radius.powi(2);
+        let c = oc.dot(oc.to_vec()) - self.radius.powi(2);
         let d = b.powi(2) - a * c;
         if d > 0.0 {
             let temp = (-b - (b * b - a * c).sqrt()) / a;
@@ -69,7 +68,7 @@ impl Hitable for Sphere {
                 return Some(HitRecord {
                     t: t,
                     p: p,
-                    normal: normal,
+                    normal: normal.to_vec(),
                 });
             }
             let temp = (-b + (b * b - a * c).sqrt()) / a;
@@ -80,7 +79,7 @@ impl Hitable for Sphere {
                 return Some(HitRecord {
                     t: t,
                     p: p,
-                    normal: normal,
+                    normal: normal.to_vec(),
                 });
             }
         }

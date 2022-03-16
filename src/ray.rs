@@ -1,12 +1,11 @@
-use cgmath::Vector3;
-use crate::Vec3;
+use crate::*;
 
 pub struct Ray {
-    pub o: Vector3<f32>,
-    pub d: Vector3<f32>,
+    pub o: Pt3,
+    pub d: Vec3,
 }
 impl Ray {
-    pub fn point_at_parameter(&self, t: f32) -> Vec3 {
+    pub fn point_at_parameter(&self, t: f32) -> Pt3 {
         self.o + (t * self.d)
     }
 }
