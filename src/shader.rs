@@ -4,8 +4,8 @@ use crate::ray::*;
 use crate::*;
 
 /// shade with the normal vector of the hitting surface
-pub fn normal_shade(r: &Ray, world: &impl Hitable) -> RGBSpectrum {
-    if let Some(rec) = world.hit(r, T_MIN, T_MAX) {
+pub fn normal_shade(r: &Ray, world: &World) -> RGBSpectrum {
+    if let Some(rec) = world.objects.hit(r, T_MIN, T_MAX) {
         0.5 * Vec3::new(rec.normal.x + 1.0, rec.normal.y + 1.0, rec.normal.z + 1.0)
     } else {
         RGBSpectrum::new(0.8, 0.8, 0.8)
@@ -19,14 +19,28 @@ pub struct World {
 }
 
 /// ray tracing shader
-pub fn trace_shader(r: &Ray, world: &World) -> RGBSpectrum {
+pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
+    if depth > 40 {
+        return BLACK
+    }
     // TODO: direct to light source
     match world.objects.hit(r, T_MIN, T_MAX) {
         // intersect, then trace
         Some(rec) => {
             // calculate the shadow ray
+            let recr = &rec.clone();
             match world.lights.visible(rec.p, &world.objects) {
-                Some(r) => r,
+                Some(shadow) => match rec.mat {
+                    Some(m) => match m.scatter(&r, recr) {
+                        Some(scattered) => {
+                            let a = m.attenuation();
+                            let t = trace_shader(&scattered, world, depth + 1) + shadow;
+                            Vec3::new(t.x * a.x, t.y * a.y, t.z * a.z)
+                        }
+                        None => BLACK,
+                    },
+                    None => panic!("no material"),
+                },
                 None => BLACK,
             }
         }

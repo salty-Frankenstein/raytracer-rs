@@ -1,18 +1,22 @@
+use crate::light::*;
+use crate::material::*;
 use crate::ray::Ray;
 use crate::*;
-use crate::light::*;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct HitRecord {
     pub t: f32,
     pub p: Pt3,
     pub normal: Vec3,
+    pub mat: Option<Rc<dyn Material>>,
 }
 
 pub const EMPTY_REC: HitRecord = HitRecord {
     t: 0.0,
     p: Pt3::new(0.0, 0.0, 0.0),
     normal: Vec3::new(0.0, 0.0, 0.0),
+    mat: None
 };
 
 pub trait Hitable {

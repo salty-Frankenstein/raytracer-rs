@@ -44,9 +44,9 @@ impl Mesh {
             disp: disp,
         };
         for f in &mut self.face_list {
-            f.0 = d.transform_point(f.0);
-            f.1 = d.transform_point(f.1);
-            f.2 = d.transform_point(f.2);
+            f.vertex.0 = d.transform_point(f.vertex.0);
+            f.vertex.1 = d.transform_point(f.vertex.1);
+            f.vertex.2 = d.transform_point(f.vertex.2);
         }
     }
 
