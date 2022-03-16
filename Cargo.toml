@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 cgmath = "0.18.0"
+obj-rs = "0.6"

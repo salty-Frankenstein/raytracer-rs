@@ -1,10 +1,11 @@
-const NX: i32 = 200;
-const NY: i32 = 100;
-
-use ray_tracer::geometry::*;
 use ray_tracer::hitable::*;
+use ray_tracer::geometry::*;
 use ray_tracer::ray::*;
 use ray_tracer::*;
+use ray_tracer::obj_loader::*;
+
+const NX: i32 = 200;
+const NY: i32 = 100;
 
 fn color(r: &Ray, world: &HitableList) -> Color {
     if let Some(rec) = world.hit(r, 0.0, 10000000.0) {
@@ -14,30 +15,33 @@ fn color(r: &Ray, world: &HitableList) -> Color {
     }
 }
 
-fn main() {
+
+fn main() -> obj::ObjResult<()> {
     println!("P3\n{} {}\n255", NX, NY);
     let origin = Vec3::new(0.0, 0.0, 0.0);
     let vertical = Vec3::new(0.0, 2.0, 0.0);
     let horizontal = Vec3::new(4.0, 0.0, 0.0);
     let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
 
-    let world = HitableList {
-        list: vec![
-            // Box::new(Sphere {
-            //     center: Vec3::new(0.0, 0.0, -1.0),
-            //     radius: 0.5,
-            // }),
-            Box::new(Triangle(
-                Vec3::new(0.0, 0.0, -1.0),
-                Vec3::new(0.2, 0.1, -1.0),
-                Vec3::new(-0.2, 0.2, -1.0),
-            )),
-            Box::new(Sphere {
-                center: Vec3::new(0.0, -100.5, -1.0),
-                radius: 100.0,
-            }),
-        ],
-    };
+    // let world = HitableList {
+    //     list: vec![
+    //         // Box::new(Sphere {
+    //         //     center: Vec3::new(0.0, 0.0, -1.0),
+    //         //     radius: 0.5,
+    //         // }),
+    //         Box::new(Triangle(
+    //             Vec3::new(0.0, 0.0, -1.0),
+    //             Vec3::new(0.2, 0.1, -1.0),
+    //             Vec3::new(-0.2, 0.2, -1.0),
+    //         )),
+    //         Box::new(Sphere {
+    //             center: Vec3::new(0.0, -100.5, -1.0),
+    //             radius: 100.0,
+    //         }),
+    //     ],
+    // };
+
+    let world = load_obj_file(String::from("./input/miku.obj"))?;
 
     for j in (0..NY).rev() {
         for i in 0..NX {
@@ -54,4 +58,5 @@ fn main() {
             println!("{} {} {}", ir, ig, ib);
         }
     }
+    Ok(())
 }
