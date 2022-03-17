@@ -8,7 +8,8 @@ use std::time::*;
 
 fn main() -> obj::ObjResult<()> {
     let now = Instant::now();
-    let scene = Scene::test_scene()?;
+    // let scene = Scene::test_scene()?;
+    let scene = Scene::cornell_box()?;
     let mut output = File::create("./output/out.ppm")?;
 
     writeln!(&mut output, "P3\n{} {}\n255", NX, NY)?;
@@ -21,7 +22,7 @@ fn main() -> obj::ObjResult<()> {
                 let v = (j as f32 + rng.gen::<f32>()) / NY as f32;
 
                 let r = scene.cam.get_ray(u, v);
-                // let col = normal_shade(&r, &world);
+                // col += normal_shade(&r, &scene.world);
                 col += trace_shader(&r, &scene.world, 0);
             }
             col = &col / NS as f32;

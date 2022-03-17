@@ -50,7 +50,7 @@ impl Hitable for Triangle {
             return None;
         }
         let t = inv_det * _Q.dot(_E2);
-        if t - 0.0 < t_min {
+        if t - 0.0 < t_min || t > t_max {
             return None;
         }
         Some(HitRecord {
