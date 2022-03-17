@@ -50,7 +50,7 @@ impl Hitable for Triangle {
             return None;
         }
         let t = inv_det * _Q.dot(_E2);
-        if t - 0.0 < f32::EPSILON {
+        if t - 0.0 < t_min {
             return None;
         }
         Some(HitRecord {
@@ -76,7 +76,7 @@ impl Hitable for Sphere {
         let b = oc.dot(r.d);
         let c = oc.dot(oc.to_vec()) - self.radius.powi(2);
         let d = b.powi(2) - a * c;
-        if d > f32::EPSILON {
+        if d > t_min {
             let temp = (-b - (b * b - a * c).sqrt()) / a;
             if temp < t_max && temp > t_min {
                 let t = temp;
