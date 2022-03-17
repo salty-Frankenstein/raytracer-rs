@@ -1,4 +1,3 @@
-use crate::light::*;
 use crate::material::*;
 use crate::ray::Ray;
 use crate::*;
