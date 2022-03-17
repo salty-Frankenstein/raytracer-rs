@@ -68,22 +68,22 @@ impl Scene {
                 },
                 lights: LightList {
                     list: vec![
+                        Box::new(PointLight {
+                            origin: Pt3::new(1.0, 1.0, 1.0),
+                            spectrum: RGBSpectrum::new(1.0, 1.0, 1.0),
+                        }),
                         // Box::new(PointLight {
                         //     origin: Pt3::new(1.0, 1.0, 2.0),
-                        //     spectrum: RGBSpectrum::new(0.5, 0.5, 0.5),
+                        //     spectrum: RGBSpectrum::new(0.5, 0.0, 0.0),
                         // }),
-                        Box::new(PointLight {
-                            origin: Pt3::new(1.0, 1.0, 2.0),
-                            spectrum: RGBSpectrum::new(0.5, 0.0, 0.0),
-                        }),
-                        Box::new(PointLight {
-                            origin: Pt3::new(-1.0, 1.0, 2.0),
-                            spectrum: RGBSpectrum::new(0.0, 0.0, 0.5),
-                        }),
-                        Box::new(PointLight {
-                            origin: Pt3::new(0.0, 3.0, 2.0),
-                            spectrum: RGBSpectrum::new(0.0, 0.5, 0.0),
-                        }),
+                        // Box::new(PointLight {
+                        //     origin: Pt3::new(-1.0, 1.0, 2.0),
+                        //     spectrum: RGBSpectrum::new(0.0, 0.0, 0.5),
+                        // }),
+                        // Box::new(PointLight {
+                        //     origin: Pt3::new(0.0, 3.0, 2.0),
+                        //     spectrum: RGBSpectrum::new(0.0, 0.5, 0.0),
+                        // }),
                     ],
                 },
             },
@@ -100,7 +100,7 @@ impl Scene {
         let mut miku = load_obj_file(String::from("./input/miku.obj"))?;
         miku.scale(0.01);
         miku.rotate(-90.0, 0.0, -5.0);
-        miku.displacement(Vec3::new(0.3, -0.7, -2.5));
+        miku.displacement(Vec3::new(0.3, -0.97, -2.5));
         let (v1, v2, v3, v4) = (
             Pt3::new(-1.0, -1.0, -1.0),
             Pt3::new(1.0, -1.0, -1.0),
@@ -161,7 +161,7 @@ impl Scene {
                     list: vec![
                         Box::new(PointLight {
                             origin: Pt3::new(0.0, 1.0, -2.0),
-                            spectrum: RGBSpectrum::new(0.5, 0.5, 0.5),
+                            spectrum: RGBSpectrum::new(0.8, 0.8, 0.8),
                         }),
                         // Box::new(PointLight {
                         //     origin: Pt3::new(1.0, 1.0, 2.0),

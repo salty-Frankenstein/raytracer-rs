@@ -35,7 +35,7 @@ fn main() -> obj::ObjResult<()> {
         }
         if j % 5 == 0 {
             println!(
-                "Now rendering: {}%, {} seconds elapesd",
+                "Now rendering: {}%, {} seconds elapsed",
                 ((NY - j) * 100) as f32 / NY as f32,
                 now.elapsed().as_secs()
             );

@@ -29,12 +29,12 @@ pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
         Some(rec) => {
             // calculate the shadow ray
             let recr = &rec.clone();
-            match world.lights.visible(rec.p, &world.objects) {
-                Some(shadow) => match rec.mat {
+            match world.lights.visible(rec.p, rec.normal, &world.objects) {
+                Some(direct) => match rec.mat {
                     Some(m) => match m.scatter(&r, recr) {
                         Some(scattered) => {
                             let a = m.attenuation();
-                            let t = trace_shader(&scattered, world, depth + 1) + shadow;
+                            let t = trace_shader(&scattered, world, depth + 1) + direct;
                             Vec3::new(t.x * a.x, t.y * a.y, t.z * a.z)
                         }
                         None => BLACK,
