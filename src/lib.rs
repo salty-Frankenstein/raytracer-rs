@@ -14,6 +14,10 @@ pub type Color = Vec3;
 pub const T_MAX: f32 = 10000000.0;
 pub const T_MIN: f32 = 0.001;
 
-pub const NX: i32 = 600;
-pub const NY: i32 = 600;
-pub const NS: i32 = 1;
+pub const NX: i32 = 200;
+pub const NY: i32 = 200;
+pub const NS: i32 = 2;
+
+pub fn mul_v(v1: &Vec3, v2: &Vec3) -> Vec3 {
+    Vec3::new(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z)
+}

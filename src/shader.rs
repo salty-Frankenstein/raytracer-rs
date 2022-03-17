@@ -2,6 +2,7 @@ use crate::hitable::*;
 use crate::light::*;
 use crate::ray::*;
 use crate::*;
+use cgmath:: prelude::*;
 
 /// shade with the normal vector of the hitting surface
 pub fn normal_shade(r: &Ray, world: &World) -> RGBSpectrum {
@@ -23,7 +24,6 @@ pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
     if depth > 40 {
         return BLACK
     }
-    // TODO: direct to light source
     match world.objects.hit(r, T_MIN, T_MAX) {
         // intersect, then trace
         Some(rec) => {
@@ -33,17 +33,19 @@ pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
                 Some(direct) => match rec.mat {
                     Some(m) => match m.scatter(&r, recr) {
                         Some(scattered) => {
-                            let a = m.attenuation();
                             let t = trace_shader(&scattered, world, depth + 1) + direct;
-                            Vec3::new(t.x * a.x, t.y * a.y, t.z * a.z)
+                            mul_v(&t, &m.attenuation())
                         }
-                        None => BLACK,
+                        None => {
+                            mul_v(&direct, &m.attenuation())
+                        }
                     },
                     None => panic!("no material"),
                 },
                 None => BLACK,
             }
         }
+        // TODO: direct to light source
         None => BLACK,
     }
 }

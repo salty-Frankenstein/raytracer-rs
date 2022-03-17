@@ -26,13 +26,28 @@ impl Material for Metal {
             o: rec.p,
             d: reflected
         };
-        // TODO
+        // TODO: figure out the formula
         if scattered.d.dot(rec.normal) > f32::EPSILON {
             Some(scattered)
         }
         else {
             None
         }
+    }
+
+    fn attenuation(&self) -> RGBSpectrum {
+        self.albedo
+    }
+}
+
+pub struct Diffuse {
+    pub albedo: RGBSpectrum
+}
+
+impl Material for Diffuse {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray> {
+        // stop tracing for diffused
+        None
     }
 
     fn attenuation(&self) -> RGBSpectrum {

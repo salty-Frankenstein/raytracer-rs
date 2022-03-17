@@ -16,11 +16,11 @@ pub struct Scene {
 fn make_square(vertex: (Pt3, Pt3, Pt3, Pt3), albedo: RGBSpectrum) -> (Triangle, Triangle) {
     let t1 = Triangle {
         vertex: (vertex.0, vertex.1, vertex.2),
-        mat: Rc::new(Metal { albedo: albedo }),
+        mat: Rc::new(Diffuse { albedo: albedo }),
     };
     let t2 = Triangle {
         vertex: (vertex.0, vertex.2, vertex.3),
-        mat: Rc::new(Metal { albedo: albedo }),
+        mat: Rc::new(Diffuse { albedo: albedo }),
     };
     (t1, t2)
 }
@@ -92,15 +92,15 @@ impl Scene {
     }
 
     pub fn cornell_box() -> obj::ObjResult<Scene> {
-        // let mut cube = load_obj_file(String::from("./input/cube.obj"))?;
-        // cube.scale(0.05);
-        // cube.rotate(30.0, 40.0, 30.0);
-        // cube.displacement(Vec3::new(-0.2, -0.0, -2.5));
+        let mut cube = load_obj_file(String::from("./input/cube.obj"))?;
+        cube.scale(0.1);
+        cube.rotate(0.0, 70.0, 0.0);
+        cube.displacement(Vec3::new(0.0, -1.0, -1.5));
 
         let mut miku = load_obj_file(String::from("./input/miku.obj"))?;
         miku.scale(0.01);
         miku.rotate(-90.0, 0.0, -5.0);
-        miku.displacement(Vec3::new(0.3, -0.97, -2.5));
+        miku.displacement(Vec3::new(0.0, -0.97, -2.5));
         let (v1, v2, v3, v4) = (
             Pt3::new(-1.0, -1.0, -1.0),
             Pt3::new(1.0, -1.0, -1.0),
@@ -114,7 +114,7 @@ impl Scene {
             Pt3::new(-1.0, 1.0, -3.0),
         );
         let (t1, t2) = make_square((v1, v2, v3, v4), RGBSpectrum::new(0.8, 0.8, 0.8));
-        // let (t3, t4) = make_square((v5, v8, v7, v6), RGBSpectrum::new(0.8, 0.8, 0.8));
+        let (t3, t4) = make_square((v5, v8, v7, v6), RGBSpectrum::new(0.8, 0.8, 0.8));
         let (t5, t6) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.8, 0.8, 0.8));
         let (t7, t8) = make_square((v1, v4, v8, v5), RGBSpectrum::new(0.8, 0.0, 0.0));
         let (t9, t10) = make_square((v3, v2, v6, v7), RGBSpectrum::new(0.0, 0.8, 0.0));
@@ -130,7 +130,7 @@ impl Scene {
                 objects: HitableList {
                     list: vec![
                         Box::new(miku),
-                        // Box::new(cube),
+                        Box::new(cube),
                         Box::new(t1),
                         Box::new(t2),
                         // Box::new(t3),
@@ -159,9 +159,13 @@ impl Scene {
                 },
                 lights: LightList {
                     list: vec![
+                        // Box::new(PointLight {
+                        //     origin: Pt3::new(0.0, 0.0, 0.0),
+                        //     spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
+                        // }),
                         Box::new(PointLight {
                             origin: Pt3::new(0.0, 1.0, -2.0),
-                            spectrum: RGBSpectrum::new(0.8, 0.8, 0.8),
+                            spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
                         }),
                         // Box::new(PointLight {
                         //     origin: Pt3::new(1.0, 1.0, 2.0),
