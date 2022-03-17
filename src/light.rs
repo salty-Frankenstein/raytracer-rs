@@ -2,6 +2,8 @@ use crate::hitable::*;
 use crate::ray::*;
 use crate::*;
 use cgmath::prelude::*;
+use cgmath::Vector2;
+use rand::prelude::*;
 
 /// the RGB spectrum, R, G, B respectively
 pub type RGBSpectrum = Vec3;
@@ -11,6 +13,9 @@ pub const BLACK: RGBSpectrum = RGBSpectrum::new(0.0, 0.0, 0.0);
 pub trait Light {
     /// test if the hit point is visible with the light, return the radiance if so
     fn visible(&self, hit_point: Pt3, normal: Vec3, world: &HitableList) -> Option<RGBSpectrum>;
+
+    /// test if a ray hits the light source
+    fn hit(&self, r: &Ray) -> Option<RGBSpectrum>;
 }
 
 /// point light source
@@ -27,15 +32,78 @@ impl Light for PointLight {
             o: hit_point,
             d: dir,
         };
-        // if hit something, then it is invisible
-        match world.hit(&r, T_MIN, T_MAX) {
+        // if hit something , then it is invisible
+        // tmax > 1.0 means that the hit point is behind the light source
+        match world.hit(&r, T_MIN, 1.0 - T_MIN) {
             Some(_) => None,
-            None => Some(self.spectrum 
-                // unit vector dir dot normal is the cosine of the angle
-                * dir.normalize().dot(normal.normalize())   // lambert's law
-                // dir dot dir is the squared length to the light
-                / dir.dot(dir)                              // inverse square law
-            ),
+            // lambert's law & inverse square law
+            // unit vector dir dot normal is the cosine of the angle
+            // dir dot dir is the squared length to the light
+            None => Some(self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir)),
+        }
+    }
+
+    fn hit(&self, _r: &Ray) -> Option<RGBSpectrum> {
+        None
+    }
+}
+
+pub struct DiskLight {
+    pub origin: Pt3,
+    pub radius: f32,
+    pub spectrum: RGBSpectrum,
+}
+
+fn random_in_unit_disk() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    loop {
+        let p = 2.0 * Vec3::new(rng.gen(), 0.0, rng.gen()) - Vec3::new(1.0, 0.0, 1.0);
+        if p.dot(p) < 1.0 {
+            return p;
+        }
+    }
+}
+
+impl Light for DiskLight {
+    fn visible(&self, hit_point: Pt3, normal: Vec3, world: &HitableList) -> Option<RGBSpectrum> {
+        // actually it's an integral, here use Monte Carlo
+        // TODO: refactor
+        let mut radiance = BLACK;
+        for _ in 0..NS {
+            let origin = self.origin + random_in_unit_disk() * self.radius;
+            let dir = origin - hit_point;
+            let r = Ray {
+                o: hit_point,
+                d: dir,
+            };
+            if world.hit(&r, T_MIN, 1.0 - T_MIN).is_none() {
+                radiance += self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir)
+            }
+        }
+        radiance /= NS as f32;
+        if radiance != BLACK {
+            Some(radiance)
+        } else {
+            None
+        }
+    }
+
+    fn hit(&self, r: &Ray) -> Option<RGBSpectrum> {
+        let hit_t = (self.origin.y - r.o.y) / r.d.y;
+        let hit_x = r.o.x + hit_t * r.d.x;
+        let hit_z = r.o.z + hit_t * r.d.z;
+        // let normal = Vec3::new(0.0, 0.0, 1.0);
+        // let dir = r.d;
+        let vh = Vector2::new(hit_x, hit_z);
+        let vo = Vector2::new(self.origin.x, self.origin.z);
+        let rt = vh - vo;
+        if rt.dot(rt) <= self.radius.powi(2) {
+            Some(self.spectrum 
+                // * dir.normalize().dot(normal.normalize())
+            //  / dir.dot(dir)
+            )
+        } else {
+            None
         }
     }
 }
@@ -58,5 +126,15 @@ impl Light for LightList {
         } else {
             None
         }
+    }
+    fn hit(&self, r: &Ray) -> Option<RGBSpectrum> {
+        // TODO: refactor
+        for l in &self.list {
+            let t = l.hit(r);
+            if t.is_some() {
+                return t;
+            }
+        }
+        return None;
     }
 }

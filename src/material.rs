@@ -45,7 +45,7 @@ pub struct Diffuse {
 }
 
 impl Material for Diffuse {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray> {
+    fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<Ray> {
         // stop tracing for diffused
         None
     }

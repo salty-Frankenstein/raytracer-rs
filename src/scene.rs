@@ -129,12 +129,12 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        Box::new(miku),
+                        // Box::new(miku),
                         Box::new(cube),
                         Box::new(t1),
                         Box::new(t2),
-                        // Box::new(t3),
-                        // Box::new(t4),
+                        Box::new(t3),
+                        Box::new(t4),
                         Box::new(t5),
                         Box::new(t6),
                         Box::new(t7),
@@ -163,22 +163,15 @@ impl Scene {
                         //     origin: Pt3::new(0.0, 0.0, 0.0),
                         //     spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
                         // }),
-                        Box::new(PointLight {
+                        // Box::new(PointLight {
+                        //     origin: Pt3::new(0.0, 1.0, -2.0),
+                        //     spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
+                        // }),
+                        Box::new(DiskLight {
                             origin: Pt3::new(0.0, 1.0, -2.0),
+                            radius: 0.5,
                             spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
                         }),
-                        // Box::new(PointLight {
-                        //     origin: Pt3::new(1.0, 1.0, 2.0),
-                        //     spectrum: RGBSpectrum::new(0.5, 0.0, 0.0),
-                        // }),
-                        // Box::new(PointLight {
-                        //     origin: Pt3::new(-1.0, 1.0, 2.0),
-                        //     spectrum: RGBSpectrum::new(0.0, 0.0, 0.5),
-                        // }),
-                        // Box::new(PointLight {
-                        //     origin: Pt3::new(0.0, 3.0, 2.0),
-                        //     spectrum: RGBSpectrum::new(0.0, 0.5, 0.0),
-                        // }),
                     ],
                 },
             },
