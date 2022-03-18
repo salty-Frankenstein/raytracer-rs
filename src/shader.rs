@@ -33,18 +33,20 @@ pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
         Some(rec) => {
             // calculate the shadow ray
             let recr = &rec.clone();
-            match world.lights.visible(rec.p, rec.normal, &world.objects) {
-                Some(direct) => match rec.mat {
-                    Some(m) => match m.scatter(&r, recr) {
-                        Some(scattered) => {
-                            let t = trace_shader(&scattered, world, depth + 1) + direct;
-                            mul_v(&t, &m.attenuation())
-                        }
-                        None => mul_v(&direct, &m.attenuation()),
+            match rec.mat {
+                Some(m) => match m.scatter(&r, recr) {
+                    // for scatter case, the result is only dependent on the scattered ray
+                    Some(scattered) => {
+                        let t = trace_shader(&scattered, world, depth + 1);
+                        mul_v(&t, &m.attenuation())
+                    }
+                    // for diffuse case, check visibility
+                    None => match world.lights.visible(rec.p, rec.normal, &world.objects) {
+                        Some(direct) => mul_v(&direct, &m.attenuation()),
+                        None => BLACK,
                     },
-                    None => panic!("no material"),
                 },
-                None => BLACK,
+                None => panic!("no material"),
             }
         }
         None => BLACK,

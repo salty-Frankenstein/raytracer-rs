@@ -129,7 +129,7 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        // Box::new(miku),
+                        Box::new(miku),
                         Box::new(cube),
                         Box::new(t1),
                         Box::new(t2),
@@ -141,20 +141,14 @@ impl Scene {
                         Box::new(t8),
                         Box::new(t9),
                         Box::new(t10),
-                        // Box::new(Sphere {
-                        //     center: Vec3::new(0.0, 0.0, -1.5),
-                        //     radius: 0.2,
-                        //     mat: Rc::new(Metal {
-                        //         albedo: RGBSpectrum::new(0.0, 1.0, 1.0),
-                        //     }),
-                        // }),
-                        // Box::new(Sphere {
-                        //     center: Vec3::new(0.0, -100.5, -1.0),
-                        //     radius: 100.0,
-                        //     mat: Rc::new(Metal {
-                        //         albedo: RGBSpectrum::new(0.9, 0.5, 0.7),
-                        //     }),
-                        // }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.3, -0.25, -1.5),
+                            radius: 0.25,
+                            // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
+                            mat: Rc::new(Metal {
+                                albedo: RGBSpectrum::new(0.8, 0.7, 1.0),
+                            }),
+                        }),
                     ],
                 },
                 lights: LightList {

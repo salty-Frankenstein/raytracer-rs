@@ -69,7 +69,7 @@ impl Light for DiskLight {
         // actually it's an integral, here use Monte Carlo
         // TODO: refactor
         let mut radiance = BLACK;
-        for _ in 0..NS {
+        for _ in 0..NS2 {
             let origin = self.origin + random_in_unit_disk() * self.radius;
             let dir = origin - hit_point;
             let r = Ray {
@@ -80,7 +80,7 @@ impl Light for DiskLight {
                 radiance += self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir)
             }
         }
-        radiance /= NS as f32;
+        radiance /= NS2 as f32;
         if radiance != BLACK {
             Some(radiance)
         } else {
