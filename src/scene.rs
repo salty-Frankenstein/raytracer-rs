@@ -129,7 +129,7 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        // Box::new(miku),
+                        Box::new(miku),
                         Box::new(cube),
                         Box::new(t1),
                         Box::new(t2),

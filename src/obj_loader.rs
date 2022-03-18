@@ -10,6 +10,7 @@ use std::rc::Rc;
 
 /// choosing mesh implementations
 type MeshT = NaiveMesh;
+// type MeshT = BoxMesh;
 
 /// load an obj file, parse into a hitable
 pub fn load_obj_file(path: String) -> obj::ObjResult<MeshT> {
@@ -38,5 +39,6 @@ pub fn load_obj_file(path: String) -> obj::ObjResult<MeshT> {
         });
         i = i + 3;
     }
-    Ok(MeshT { face_list: list })
+    let acc = FromFaceList::from_face_list(&list);
+    Ok(MeshT { face_list: list, acc_structure: acc })
 }

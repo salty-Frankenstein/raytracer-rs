@@ -15,7 +15,7 @@ pub const EMPTY_REC: HitRecord = HitRecord {
     t: 0.0,
     p: Pt3::new(0.0, 0.0, 0.0),
     normal: Vec3::new(0.0, 0.0, 0.0),
-    mat: None
+    mat: None,
 };
 
 pub trait Hitable {
@@ -26,22 +26,37 @@ pub struct HitableList {
     pub list: Vec<Box<dyn Hitable>>,
 }
 
+impl Hitable for Box<dyn Hitable> {
+    fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        self.as_ref().hit(r, t_min, t_max)
+    }
+}
+
+pub fn hit_list<T: Hitable>(
+    list: &Vec<T>,
+    r: &Ray,
+    t_min: f32,
+    t_max: f32,
+) -> Option<HitRecord> {
+    let mut hit_anything = false;
+    let mut closest_so_far = t_max;
+    let mut rec = EMPTY_REC;
+    for i in list {
+        if let Some(temp_rec) = i.hit(r, t_min, closest_so_far) {
+            hit_anything = true;
+            closest_so_far = temp_rec.t;
+            rec = temp_rec;
+        }
+    }
+    if hit_anything {
+        Some(rec)
+    } else {
+        None
+    }
+}
+
 impl Hitable for HitableList {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        let mut hit_anything = false;
-        let mut closest_so_far = t_max;
-        let mut rec = EMPTY_REC;
-        for i in &self.list {
-            if let Some(temp_rec) = i.hit(r, t_min, closest_so_far) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec = temp_rec;
-            }
-        }
-        if hit_anything {
-            Some(rec)
-        } else {
-            None
-        }
+        hit_list(&self.list, r, t_min, t_max)
     }
 }

@@ -2,22 +2,22 @@ use crate::geometry::Triangle;
 use crate::hitable::*;
 use crate::ray::*;
 use crate::Vec3;
+use crate::*;
 use cgmath::prelude::*;
 use cgmath::*;
 
-/// a funtor-like trait, for transformation
-pub trait MapTriangle {
-    fn map_t<T: Fn(&Triangle) -> Triangle>(&mut self, f: T);
+pub trait FromFaceList {
+    fn from_face_list(list: &Vec<Triangle>) -> Self;
 }
 
-/// Mesh is a struct with a Hitabble & Mappable face_list,
+/// Mesh is a struct with a Hitable list and an accelerate structure
 /// for multiple implementations
-pub struct Mesh<T: Hitable + MapTriangle> {
-    // TODO: Accelerations
-    pub face_list: T,
+pub struct Mesh<T: FromFaceList> {
+    pub face_list: Vec<Triangle>,
+    pub acc_structure: T,
 }
 
-impl<T: Hitable + MapTriangle> Mesh<T> {
+impl<T: FromFaceList> Mesh<T> {
     pub fn transform(&mut self, scale: f32, disp: Vec3, x: f32, y: f32, z: f32) {
         let rotation = Quaternion::from(Euler {
             x: Deg(x),
@@ -29,14 +29,14 @@ impl<T: Hitable + MapTriangle> Mesh<T> {
             rot: rotation,
             disp: disp,
         };
-        self.face_list.map_t(|f| Triangle {
-            vertex: (
-                d.transform_point(f.vertex.0),
-                d.transform_point(f.vertex.1),
-                d.transform_point(f.vertex.2),
-            ),
-            mat: f.mat.clone(),
-        })
+
+        for f in &mut self.face_list {
+            f.vertex.0 = d.transform_point(f.vertex.0);
+            f.vertex.1 = d.transform_point(f.vertex.1);
+            f.vertex.2 = d.transform_point(f.vertex.2);
+        }
+
+        self.acc_structure = FromFaceList::from_face_list(&self.face_list)
     }
 
     pub fn scale(&mut self, scale: f32) {
@@ -54,46 +54,79 @@ impl<T: Hitable + MapTriangle> Mesh<T> {
     }
 }
 
-impl<T:Hitable+MapTriangle> Hitable for Mesh<T> {
+/// naive implementation
+pub struct Naive;
+pub type NaiveMesh = Mesh<Naive>;
+
+impl Hitable for NaiveMesh {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        self.face_list.hit(r, t_min, t_max)
+        hit_list(&self.face_list, r, t_min, t_max)
     }
 }
 
-/// instantiation for Vec<Triangle>
-pub type NaiveMesh = Mesh<Vec<Triangle>>;
+impl FromFaceList for Naive {
+    fn from_face_list(_list: &Vec<Triangle>) -> Self {
+        Naive
+    }
+}
 
-/// implement Hitable & MapTriangle for Vec<Triangle>
-impl Hitable for Vec<Triangle> {
-    // TODO: Accelerations
-    fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        let mut hit_anything = false;
-        let mut closest_so_far = t_max;
-        let mut rec = EMPTY_REC;
-        for i in self {
-            if let Some(temp_rec) = i.hit(r, t_min, closest_so_far) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec = temp_rec;
+/// Optimized Mesh structure
+pub type FastMesh = Mesh<Tree>;
+pub type BoxMesh = Mesh<BoundingBox>;
+
+/// Axis-aligned bounding box
+pub struct BoundingBox {
+    min: Vec3,
+    max: Vec3,
+}
+
+impl BoundingBox {
+    pub fn hit_box(&self, r: &Ray, t_min: f32, t_max: f32) -> bool {
+        let mut tmin = t_min;
+        let mut tmax = t_max;
+        for a in 0..3 {
+            let t0 = ((self.min[a] - r.o[a]) / r.d[a]).min((self.max[a] - r.o[a]) / r.d[a]);
+            let t1 = ((self.min[a] - r.o[a]) / r.d[a]).max((self.max[a] - r.o[a]) / r.d[a]);
+            tmin = t0.max(tmin);
+            tmax = t1.min(tmax);
+            if tmax <= tmin {
+                return false;
             }
         }
-        if hit_anything {
-            Some(rec)
+        true
+    }
+}
+
+impl FromFaceList for BoundingBox {
+    fn from_face_list(list: &Vec<Triangle>) -> Self {
+        let mut min = Vec3::new(T_MAX, T_MAX, T_MAX);
+        let mut max = -min;
+        for t in list {
+            for a in 0..3 {
+                max[a] = max[a].max(t.vertex.0[a]);
+                min[a] = min[a].min(t.vertex.0[a]);
+                max[a] = max[a].max(t.vertex.1[a]);
+                min[a] = min[a].min(t.vertex.1[a]);
+                max[a] = max[a].max(t.vertex.2[a]);
+                min[a] = min[a].min(t.vertex.2[a]);
+            }
+        }
+        println!(
+            "Box: max({}, {}, {}), min({}, {}, {})",
+            max[0], max[1], max[2], min[0], min[1], min[2]
+        );
+        BoundingBox { max: max, min: min }
+    }
+}
+
+impl Hitable for Mesh<BoundingBox> {
+    fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        if self.acc_structure.hit_box(r, t_min, t_max) {
+            hit_list(&self.face_list, r, t_min, t_max)
         } else {
             None
         }
     }
 }
 
-impl MapTriangle for Vec<Triangle> {
-    fn map_t<T: Fn(&Triangle) -> Triangle>(&mut self, f: T) {
-        for t in self {
-            *t = f(t);
-        }
-    }
-}
-
-// /// Optimized Mesh structure
-// pub struct FastMesh {
-//     mesh:
-// }
+pub struct Tree {}
