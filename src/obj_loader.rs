@@ -8,8 +8,11 @@ use std::fs::File;
 use std::io::BufReader;
 use std::rc::Rc;
 
+/// choosing mesh implementations
+type MeshT = NaiveMesh;
+
 /// load an obj file, parse into a hitable
-pub fn load_obj_file(path: String) -> obj::ObjResult<Mesh> {
+pub fn load_obj_file(path: String) -> obj::ObjResult<MeshT> {
     let file = File::open(path)?;
     let input = BufReader::new(file);
     let model: Obj<obj::Position> = load_obj(input)?;
@@ -35,5 +38,5 @@ pub fn load_obj_file(path: String) -> obj::ObjResult<Mesh> {
         });
         i = i + 3;
     }
-    Ok(Mesh { face_list: list })
+    Ok(MeshT { face_list: list })
 }
