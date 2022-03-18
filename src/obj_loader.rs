@@ -9,11 +9,12 @@ use std::io::BufReader;
 use std::rc::Rc;
 
 /// choosing mesh implementations
-type MeshT = NaiveMesh;
+// type MeshT = NaiveMesh;
 // type MeshT = BoxMesh;
+type MeshT = FastMesh;
 
 /// load an obj file, parse into a hitable
-pub fn load_obj_file(path: String) -> obj::ObjResult<MeshT> {
+pub fn load_obj_file(path: String, t: bool) -> obj::ObjResult<MeshT> {
     let file = File::open(path)?;
     let input = BufReader::new(file);
     let model: Obj<obj::Position> = load_obj(input)?;
@@ -35,10 +36,22 @@ pub fn load_obj_file(path: String) -> obj::ObjResult<MeshT> {
             ),
             // TODO: into reference
             // mat: Rc::new(Metal{albedo: Vec3::new(0.4,0.7,0.9)})
-            mat: Rc::new(Dielectric { ref_idx: 1.8 }),
+            mat: if t {
+                // Rc::new(Metal {
+                //     albedo: Vec3::new(0.9, 0.7, 0.4),
+                // })
+                Rc::new(Dielectric { ref_idx: 1.8 })
+            } else {
+                Rc::new(Metal {
+                    albedo: Vec3::new(0.4, 0.7, 0.9),
+                })
+            },
         });
         i = i + 3;
     }
     let acc = FromFaceList::from_face_list(&list);
-    Ok(MeshT { face_list: list, acc_structure: acc })
+    Ok(MeshT {
+        face_list: list,
+        acc_structure: acc,
+    })
 }
