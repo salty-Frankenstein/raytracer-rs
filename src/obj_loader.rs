@@ -14,16 +14,16 @@ use std::rc::Rc;
 type MeshT = FastMesh;
 
 /// load an obj file, parse into a hitable
-pub fn load_obj_file(path: String, t: bool) -> obj::ObjResult<MeshT> {
+pub fn load_obj_file(path: String, mat: impl Material + 'static + Clone) -> obj::ObjResult<MeshT> {
     let file = File::open(path)?;
     let input = BufReader::new(file);
-    let model: Obj<obj::Position> = load_obj(input)?;
+    let model: Obj<obj::Position, usize> = load_obj(input)?;
     let mut i = 0;
     let mut list: Vec<Triangle> = Vec::new();
     while i < model.indices.len() {
-        let idx0 = model.indices[i] as usize;
-        let idx1 = model.indices[i + 1] as usize;
-        let idx2 = model.indices[i + 2] as usize;
+        let idx0 = model.indices[i];
+        let idx1 = model.indices[i + 1];
+        let idx2 = model.indices[i + 2];
         let p0 = model.vertices[idx0].position;
         let p1 = model.vertices[idx1].position;
         let p2 = model.vertices[idx2].position;
@@ -35,17 +35,7 @@ pub fn load_obj_file(path: String, t: bool) -> obj::ObjResult<MeshT> {
                 Pt3::new(p2[0], p2[1], p2[2]),
             ),
             // TODO: into reference
-            // mat: Rc::new(Metal{albedo: Vec3::new(0.4,0.7,0.9)})
-            mat: if t {
-                // Rc::new(Metal {
-                //     albedo: Vec3::new(0.9, 0.7, 0.4),
-                // })
-                Rc::new(Dielectric { ref_idx: 1.8 })
-            } else {
-                Rc::new(Metal {
-                    albedo: Vec3::new(0.4, 0.7, 0.9),
-                })
-            },
+            mat: Rc::new(mat.clone())
         });
         i = i + 3;
     }

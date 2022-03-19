@@ -14,8 +14,8 @@ pub type Color = Vec3;
 pub const T_MAX: f32 = 10000000.0;
 pub const T_MIN: f32 = 0.001;
 
-pub const NX: i32 = 2400;
-pub const NY: i32 = 2400;
+pub const NX: i32 = 200;
+pub const NY: i32 = 200;
 pub const NS: i32 = 20;
 pub const NS2: i32 = 10;
 

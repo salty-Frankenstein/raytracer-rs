@@ -186,8 +186,6 @@ fn rand3() -> i32 {
 }
 
 fn box_compare(a: BoundingBox, b: BoundingBox, axis: usize) -> Ordering {
-    // let fcmp = |a: &f32, b: &f32| a.partial_cmp(b).unwrap();
-    // fcmp(&a.min[axis], &b.min[axis])
     a.min[axis].partial_cmp(&b.min[axis]).unwrap()
 }
 

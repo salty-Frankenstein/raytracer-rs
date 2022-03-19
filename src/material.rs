@@ -11,6 +11,7 @@ pub trait Material {
     fn attenuation(&self) -> RGBSpectrum;
 }
 
+#[derive(Clone)]
 pub struct Metal {
     pub albedo: RGBSpectrum,
 }
@@ -39,6 +40,7 @@ impl Material for Metal {
     }
 }
 
+#[derive(Clone)]
 pub struct Diffuse {
     pub albedo: RGBSpectrum,
 }
@@ -65,6 +67,7 @@ fn refract(v: Vec3, n: Vec3, ni_over_nt: f32) -> Option<Vec3> {
     }
 }
 
+#[derive(Clone)]
 pub struct Dielectric {
     pub ref_idx: f32,
 }

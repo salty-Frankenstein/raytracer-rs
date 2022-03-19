@@ -4,7 +4,7 @@ release:
 debug:
 	cargo build
 rd:
-	./target/debug/main 
+	./target/debug/main RUST_BACKTRACE=1
 	convert ./output/out.ppm ./output/out.jpg
 rr:
 	./target/release/main
