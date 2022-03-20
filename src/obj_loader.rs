@@ -1,5 +1,4 @@
 use crate::geometry::*;
-use crate::hitable::*;
 use crate::material::*;
 use crate::mesh::*;
 use crate::*;

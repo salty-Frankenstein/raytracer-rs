@@ -22,7 +22,7 @@ fn main() -> obj::ObjResult<()> {
                 let v = (j as f32 + rng.gen::<f32>()) / NY as f32;
 
                 let r = scene.cam.get_ray(u, v);
-                // col += normal_shade(&r, &scene.world);
+                // col += normal_shader(&r, &scene.world);
                 col += trace_shader(&r, &scene.world, 0);
             }
             col = &col / NS as f32;

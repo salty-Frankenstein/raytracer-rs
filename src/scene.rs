@@ -27,15 +27,16 @@ fn make_square(vertex: (Pt3, Pt3, Pt3, Pt3), albedo: RGBSpectrum) -> (Triangle, 
 
 impl Scene {
     pub fn cornell_box() -> obj::ObjResult<Scene> {
-        let mut cube = load_obj_file(
-            String::from("./input/cube.obj"),
-            Metal {
-                albedo: Vec3::new(0.4, 0.7, 0.9),
-            },
+        let mut pyramid = load_obj_file(
+            String::from("./input/pyramid.obj"),
+            Dielectric {ref_idx: 1.8}
+            // Metal {
+            //     albedo: Vec3::new(1.0, 1.0, 1.0),
+            // },
         )?;
-        cube.scale(0.1);
-        cube.rotate(0.0, 30.0, -1.0);
-        cube.displacement(Vec3::new(-0.3, -1.0, -2.0));
+        pyramid.scale(8.0);
+        pyramid.rotate(0.0, -15.0, 0.0);
+        pyramid.displacement(Vec3::new(0.55, 0.1, -2.6));
 
         // let mut miku = load_obj_file(String::from("./input/miku.obj"), true)?;
         // miku.scale(0.01);
@@ -50,31 +51,25 @@ impl Scene {
             },
         )?;
         miku2.transform(0.008, Vec3::new(0.6, -1.0, -1.3), -90.0, 0.0, -35.0);
-        // miku2.scale(0.008);
-        // miku2.rotate(-90.0, 0.0, -35.0);
-        // miku2.displacement(Vec3::new(0.6, -1.0, -1.3));
 
         let mut miku3 = load_obj_file(
             String::from("./input/.miku3.obj"),
-            // Dielectric{ref_idx: 1.8}
-            Metal {
-                albedo: Vec3::new(1.0, 1.0, 1.0),
-            },
-        )?;
-        miku3.transform(0.06, Vec3::new(-0.5, -1.0, -1.5), -90.0, 0.0, 35.0);
-        // miku3.scale(0.06);
-        // miku3.rotate(-90.0, 0.0, 35.0);
-        // miku3.displacement(Vec3::new(-0.5, -1.0, -1.5));
-
-        let mut utah = load_obj_file(
-            String::from("./input/utah.obj"),
-            Dielectric { ref_idx: 1.8 },
-            // Diffuse {
+            Dielectric{ref_idx: 1.8}
+            // Metal {
             //     albedo: Vec3::new(1.0, 1.0, 1.0),
             // },
         )?;
+        miku3.transform(0.06, Vec3::new(-0.5, -1.0, -1.5), -90.0, 0.0, 35.0);
+
+        let mut utah = load_obj_file(
+            String::from("./input/utah.obj"),
+            // Dielectric { ref_idx: 1.8 },
+            Diffuse {
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+            },
+        )?;
         utah.scale(0.1);
-        utah.displacement(Vec3::new(0.03, -0.5, -1.9));
+        utah.displacement(Vec3::new(0.1, -0.5, -1.9));
         let (v1, v2, v3, v4) = (
             Pt3::new(-1.0, -1.0, -1.0),
             Pt3::new(1.0, -1.0, -1.0),
@@ -110,7 +105,7 @@ impl Scene {
                         // Box::new(miku),
                         Box::new(miku2),
                         Box::new(miku3),
-                        Box::new(cube),
+                        Box::new(pyramid),
                         Box::new(t1),
                         Box::new(t2),
                         Box::new(t3),
@@ -121,31 +116,45 @@ impl Scene {
                         Box::new(t8),
                         Box::new(t9),
                         Box::new(t10),
-                        // Box::new(Sphere {
-                        //     center: Vec3::new(-0.36, -0.25, -1.95),
-                        //     radius: 0.25,
-                        //     // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
-                        //     mat: Rc::new(Metal {
-                        //         albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
-                        //     }),
-                        // }),
+                        Box::new(Cylinder {
+                            center_x: 0.1,
+                            center_z: -1.95,
+                            radius: 0.4,
+                            y_max: -0.5,
+                            y_min: -1.0,
+                            mat: Rc::new(Metal {
+                                albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(-0.34, 0.38, -2.0),
+                            radius: 0.25,
+                            // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
+                            mat: Rc::new(Metal {
+                                albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
+                            }),
+                        }),
                     ],
                 },
                 lights: LightList {
                     list: vec![
                         // Box::new(PointLight {
                         //     origin: Pt3::new(0.0, 0.0, 0.0),
-                        //     spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
+                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
+                        // }),
+                        // Box::new(DiskLight {
+                        //     origin: Pt3::new(0.0, 0.0, 0.0),
+                        //     radius: 1.0,
+                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         // }),
                         // Box::new(PointLight {
                         //     origin: Pt3::new(0.0, 1.0, -2.0),
-                        //     spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
+                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         // }),
                         Box::new(DiskLight {
                             origin: Pt3::new(0.0, 1.0, -2.0),
                             radius: 0.3,
-                            // spectrum: RGBSpectrum::new(0.85, 0.64, 0.48),
-                            spectrum: RGBSpectrum::new(1.5, 1.2, 0.9),
+                            spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         }),
                     ],
                 },

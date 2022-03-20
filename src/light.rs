@@ -90,6 +90,9 @@ impl Light for DiskLight {
 
     fn hit(&self, r: &Ray) -> Option<RGBSpectrum> {
         let hit_t = (self.origin.y - r.o.y) / r.d.y;
+        if hit_t < T_MIN {
+            return None;
+        }
         let hit_x = r.o.x + hit_t * r.d.x;
         let hit_z = r.o.z + hit_t * r.d.z;
         // let normal = Vec3::new(0.0, 0.0, 1.0);
