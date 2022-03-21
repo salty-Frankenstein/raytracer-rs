@@ -8,13 +8,8 @@ use std::rc::Rc;
 // pub struct Triangle(pub Pt3, pub Pt3, pub Pt3);
 pub struct Triangle {
     pub vertex: (Pt3, Pt3, Pt3),
-    // pub normal: Vec3,
     pub mat: Rc<dyn Material>,
 }
-
-// pub fn normal(a: Pt3, b: Pt3, c: Pt3) {
-
-// }
 
 impl Triangle {
     /// return the normal vector of the triangle

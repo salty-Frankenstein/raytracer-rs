@@ -4,6 +4,7 @@ use crate::*;
 use cgmath::prelude::*;
 use cgmath::Vector2;
 use rand::prelude::*;
+use std::f32::consts::PI;
 
 /// the RGB spectrum, R, G, B respectively
 pub type RGBSpectrum = Vec3;
@@ -82,7 +83,7 @@ impl Light for DiskLight {
         }
         radiance /= NS2 as f32;
         if radiance != BLACK {
-            Some(radiance)
+            Some(radiance * PI * self.radius.powi(2))
         } else {
             None
         }
@@ -95,16 +96,11 @@ impl Light for DiskLight {
         }
         let hit_x = r.o.x + hit_t * r.d.x;
         let hit_z = r.o.z + hit_t * r.d.z;
-        // let normal = Vec3::new(0.0, 0.0, 1.0);
-        // let dir = r.d;
         let vh = Vector2::new(hit_x, hit_z);
         let vo = Vector2::new(self.origin.x, self.origin.z);
         let rt = vh - vo;
         if rt.dot(rt) <= self.radius.powi(2) {
-            Some(self.spectrum 
-                // * dir.normalize().dot(normal.normalize())
-            //  / dir.dot(dir)
-            )
+            Some(self.spectrum)
         } else {
             None
         }

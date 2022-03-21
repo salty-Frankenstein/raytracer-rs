@@ -17,6 +17,7 @@ pub fn load_obj_file(path: String, mat: impl Material + 'static + Clone) -> obj:
     let file = File::open(path)?;
     let input = BufReader::new(file);
     let model: Obj<obj::Position, usize> = load_obj(input)?;
+    println!("model size: {}", model.indices.len());
     let mut i = 0;
     let mut list: Vec<Triangle> = Vec::new();
     while i < model.indices.len() {
