@@ -1,9 +1,9 @@
 use crate::hitable::*;
 use crate::ray::*;
+use crate::sampler::*;
 use crate::*;
 use cgmath::prelude::*;
 use cgmath::Vector2;
-use rand::prelude::*;
 use std::f32::consts::PI;
 
 /// the RGB spectrum, R, G, B respectively
@@ -55,23 +55,20 @@ pub struct DiskLight {
     pub spectrum: RGBSpectrum,
 }
 
-fn random_in_unit_disk() -> Vec3 {
-    let mut rng = rand::thread_rng();
-    loop {
-        let p = 2.0 * Vec3::new(rng.gen(), 0.0, rng.gen()) - Vec3::new(1.0, 0.0, 1.0);
-        if p.dot(p) < 1.0 {
-            return p;
-        }
-    }
-}
-
 impl Light for DiskLight {
     fn visible(&self, hit_point: Pt3, normal: Vec3, world: &HitableList) -> Option<RGBSpectrum> {
         // actually it's an integral, here use Monte Carlo
         // TODO: refactor
         let mut radiance = BLACK;
-        for _ in 0..NS2 {
-            let origin = self.origin + random_in_unit_disk() * self.radius;
+        // sample in disk of self.radius
+        // let mut sampler = WhiteNoiseSampler::new(self.radius * 2.0, NS2);
+        // let mut sampler = UniformSampler::new(self.radius * 2.0, NS2);
+        // let mut sampler = JitteredSampler::new(self.radius * 2.0, NS2);
+        let mut sampler = BlueNoiseSampler::new(self.radius * 2.0, NS2);
+        let mut actual_sample_num = 0;
+        while let Some((a, b)) = sampler.sample_in_disk() {
+            actual_sample_num += 1;
+            let origin = self.origin + Vec3::new(a, 0.0, b);
             let dir = origin - hit_point;
             let r = Ray {
                 o: hit_point,
@@ -81,7 +78,8 @@ impl Light for DiskLight {
                 radiance += self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir)
             }
         }
-        radiance /= NS2 as f32;
+        // println!("<{}>", actual_sample_num);
+        radiance /= actual_sample_num as f32;
         if radiance != BLACK {
             Some(radiance * PI * self.radius.powi(2))
         } else {

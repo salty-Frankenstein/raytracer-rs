@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use ray_tracer::sampler::*;
 use ray_tracer::scene::Scene;
 use ray_tracer::shader::*;
 use ray_tracer::*;
@@ -16,10 +17,11 @@ fn main() -> obj::ObjResult<()> {
     for j in (0..NY).rev() {
         for i in 0..NX {
             let mut col = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..NS {
-                let mut rng = rand::thread_rng();
-                let u = (i as f32 + rng.gen::<f32>()) / NX as f32;
-                let v = (j as f32 + rng.gen::<f32>()) / NY as f32;
+            // let mut sampler = UniformSampler::new(1.0, NS);
+            let mut sampler = WhiteNoiseSampler::new(1.0, NS);
+            while let Some((a, b)) = sampler.sample() {
+                let u = (i as f32 + a) / NX as f32;
+                let v = (j as f32 + b) / NY as f32;
 
                 let r = scene.cam.get_ray(u, v);
                 // col += normal_shader(&r, &scene.world);
