@@ -161,7 +161,7 @@ pub struct BlueNoiseSampler {
 
 impl BlueNoiseSampler {
     pub fn new(range: f32, rate: i32) -> Self {
-        let radius = (range / (rate as f32).sqrt()) * 0.7;
+        let radius = (range / (rate as f32).sqrt()) * 0.8;
         BlueNoiseSampler {
             range: range,
             rate: rate,

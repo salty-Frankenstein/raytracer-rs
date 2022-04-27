@@ -3,9 +3,11 @@ use crate::geometry::*;
 use crate::hitable::*;
 use crate::light::*;
 use crate::material::*;
+use crate::mesh::*;
 use crate::obj_loader::*;
 use crate::shader::*;
 use crate::*;
+use cgmath::prelude::*;
 use std::rc::Rc;
 
 pub struct Scene {
@@ -23,6 +25,26 @@ fn make_square(vertex: (Pt3, Pt3, Pt3, Pt3), albedo: RGBSpectrum) -> (Triangle, 
         mat: Rc::new(Diffuse { albedo: albedo }),
     };
     (t1, t2)
+}
+
+fn make_chess_board(vertex: (Pt3, Pt3, Pt3, Pt3), num: i32) -> Vec<Triangle> {
+    let ori = vertex.0.to_vec();
+    let vi = (vertex.1 - vertex.0) / num as f32;
+    let vj = (vertex.3 - vertex.0) / num as f32;
+    let mut list = Vec::new();
+    for i in 1..num + 1 {
+        for j in 1..num + 1 {
+            let p00 = Pt3::from_vec(ori + (i - 1) as f32 * vi + (j - 1) as f32 * vj);
+            let p01 = Pt3::from_vec(ori + (i - 1) as f32 * vi + j as f32 * vj);
+            let p10 = Pt3::from_vec(ori + i as f32 * vi + (j - 1) as f32 * vj);
+            let p11 = Pt3::from_vec(ori + i as f32 * vi + j as f32 * vj);
+            let color = if (i + j) % 2 == 0 { BLACK } else { WHITE };
+            let (t1, t2) = make_square((p00, p10, p11, p01), color);
+            list.push(t1);
+            list.push(t2);
+        }
+    }
+    list
 }
 
 impl Scene {
@@ -171,5 +193,52 @@ impl Scene {
             },
         };
         Ok(s)
+    }
+
+    pub fn blue_noise_test() -> Scene {
+        let a = (
+            Pt3::new(-1.0, 0.0, -1.0),
+            Pt3::new(1.0, 0.0, -1.0),
+            Pt3::new(1.0, 0.0, -3.0),
+            Pt3::new(-1.0, 0.0, -3.0),
+        );
+        let chess_board = make_chess_board(a, 24);
+        let acc = FromFaceList::from_face_list(&chess_board);
+        let mut chess_board_mesh = FastMesh {
+            face_list: chess_board,
+            acc_structure: acc,
+        };
+        chess_board_mesh.displacement(Vec3::new(0.0, 0.0, 2.0));
+        chess_board_mesh.scale(5.0);
+        chess_board_mesh.rotate(10.0, 30.0, 5.1);
+        chess_board_mesh.displacement(Vec3::new(0.0, -0.5, -7.0));
+        let s = Scene {
+            cam: Camera::new(
+                Pt3::new(0.0, 0.0, 2.0),
+                Pt3::new(0.0, 0.0, -1.0),
+                Vec3::new(0.0, 1.0, 0.0),
+                90.0,
+                NX as f32 / NY as f32,
+            ),
+            world: World {
+                objects: HitableList {
+                    list: vec![Box::new(chess_board_mesh)],
+                },
+                lights: LightList {
+                    list: vec![
+                        Box::new(PointLight {
+                            origin: Pt3::new(0.0, 2.0, -5.0),
+                            spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 10.8,
+                        }),
+                        // Box::new(DiskLight {
+                        //     origin: Pt3::new(0.0, 2.0, -5.0),
+                        //     radius: 0.4,
+                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 10.0,
+                        // }),
+                    ],
+                },
+            },
+        };
+        s
     }
 }

@@ -1,4 +1,4 @@
-.PHONY:build run rd rr save trash
+.PHONY:build run rd rr save trash resize
 release:
 	cargo build -r
 debug:
@@ -13,3 +13,5 @@ save:
 	cp ./output/out.jpg ./output/$(FILENAME).jpg
 trash:
 	cp ./output/out.jpg ./trash/$(FILENAME).jpg
+resize:
+	python3 resize.py ./output/out.jpg ./output/out.jpg

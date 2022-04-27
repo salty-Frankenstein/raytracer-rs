@@ -9,6 +9,7 @@ use std::f32::consts::PI;
 /// the RGB spectrum, R, G, B respectively
 pub type RGBSpectrum = Vec3;
 pub const BLACK: RGBSpectrum = RGBSpectrum::new(0.0, 0.0, 0.0);
+pub const WHITE: RGBSpectrum = RGBSpectrum::new(1.0, 1.0, 1.0);
 
 /// trait of light sources
 pub trait Light {
