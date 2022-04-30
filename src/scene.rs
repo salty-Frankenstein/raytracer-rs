@@ -5,6 +5,7 @@ use crate::light::*;
 use crate::material::*;
 use crate::mesh::*;
 use crate::obj_loader::*;
+use crate::sampler::*;
 use crate::shader::*;
 use crate::*;
 use cgmath::prelude::*;
@@ -48,7 +49,7 @@ fn make_chess_board(vertex: (Pt3, Pt3, Pt3, Pt3), num: i32) -> Vec<Triangle> {
 }
 
 impl Scene {
-    pub fn cornell_box() -> obj::ObjResult<Scene> {
+    pub fn cornell_box(sampler_kind: SamplerKind) -> obj::ObjResult<Scene> {
         let mut pyramid = load_obj_file(
             String::from("./input/pyramid.obj"),
             Dielectric {ref_idx: 1.8}
@@ -106,9 +107,16 @@ impl Scene {
         );
         let (t1, t2) = make_square((v1, v2, v3, v4), RGBSpectrum::new(0.8, 0.8, 0.8));
         let (t3, t4) = make_square((v5, v8, v7, v6), RGBSpectrum::new(0.8, 0.8, 0.8));
-        let (t5, t6) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.8, 0.8, 0.8));
+        // let (t5, t6) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.8, 0.8, 0.8));
         let (t7, t8) = make_square((v1, v4, v8, v5), RGBSpectrum::new(0.8, 0.0, 0.0));
         let (t9, t10) = make_square((v3, v2, v6, v7), RGBSpectrum::new(0.0, 0.8, 0.0));
+        let chess_board = make_chess_board((v4, v3, v7, v8), 12);
+        let acc = FromFaceList::from_face_list(&chess_board);
+        let mut chess_board_mesh = FastMesh {
+            face_list: chess_board,
+            acc_structure: acc,
+        };
+        chess_board_mesh.rotate(0.01, 0.0, 0.0); // avoid abnormal triangles
         let s = Scene {
             cam: Camera::new(
                 // Pt3::new(0.0, 10.0, 0.0),
@@ -132,8 +140,9 @@ impl Scene {
                         Box::new(t2),
                         Box::new(t3),
                         Box::new(t4),
-                        Box::new(t5),
-                        Box::new(t6),
+                        // Box::new(t5),
+                        // Box::new(t6),
+                        Box::new(chess_board_mesh),
                         Box::new(t7),
                         Box::new(t8),
                         Box::new(t9),
@@ -173,21 +182,24 @@ impl Scene {
                         //     origin: Pt3::new(0.0, 1.0, -2.0),
                         //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         // }),
+                        // Box::new(DiskLight {
+                        //     origin: Pt3::new(0.0, 1.0, -2.0),
+                        //     radius: 0.4,
+                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 2.0,
+                        //     sampler_kind: sampler_kind,
+                        // }),
                         Box::new(DiskLight {
-                            origin: Pt3::new(0.0, 1.0, -2.0),
+                            origin: Pt3::new(-0.45, 1.0, -2.25),
                             radius: 0.4,
-                            spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 2.0,
+                            spectrum: RGBSpectrum::new(0.9, 0.0, 0.48) * 2.0,
+                            sampler_kind: sampler_kind
                         }),
-                        // Box::new(DiskLight {
-                        //     origin: Pt3::new(-0.45, 1.0, -2.25),
-                        //     radius: 0.4,
-                        //     spectrum: RGBSpectrum::new(0.9, 0.0, 0.48) * 2.0,
-                        // }),
-                        // Box::new(DiskLight {
-                        //     origin: Pt3::new(0.45, 1.0, -1.75),
-                        //     radius: 0.4,
-                        //     spectrum: RGBSpectrum::new(0.0, 0.63, 0.48) * 2.0,
-                        // }),
+                        Box::new(DiskLight {
+                            origin: Pt3::new(0.45, 1.0, -1.75),
+                            radius: 0.4,
+                            spectrum: RGBSpectrum::new(0.0, 0.63, 0.48) * 2.0,
+                            sampler_kind: sampler_kind
+                        }),
                     ],
                 },
             },

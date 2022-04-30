@@ -1,7 +1,7 @@
 from PIL import Image
 import sys
 
-RATE = 8
+RATE = 4
 imagepath = sys.argv[1]
 image = Image.open(imagepath)
 (sx, sy) = image.size

@@ -1,4 +1,25 @@
 use rand::prelude::*;
+use std::io;
+
+#[derive(Clone, Copy)]
+pub enum SamplerKind {
+    WhiteNoise,
+    BlueNoise,
+    Jittered,
+    Uniform,
+}
+
+impl SamplerKind {
+    pub fn from_int(i: i32) -> io::Result<SamplerKind> {
+        match i {
+            1 => Ok(SamplerKind::WhiteNoise),
+            2 => Ok(SamplerKind::Uniform),
+            3 => Ok(SamplerKind::Jittered),
+            4 => Ok(SamplerKind::BlueNoise),
+            _ => Err(io::Error::new(io::ErrorKind::Other, "unexpected integer")),
+        }
+    }
+}
 
 /// a sampler trait for a 2D square area
 /// this is an iterator-like API, where `sample` for the `next` method
@@ -143,7 +164,7 @@ impl AreaSampler for JitteredSampler {
     }
 
     fn sample_in_disk(&mut self) -> Option<(f32, f32)> {
-        _sample_in_disk(&mut self.uniform_sampler)
+        _sample_in_disk(self)
     }
 
     fn get_range(&self) -> f32 {
@@ -155,25 +176,60 @@ pub struct BlueNoiseSampler {
     range: f32,
     rate: i32,
     radius: f32,
-    rng: rand::prelude::ThreadRng,
     points: Vec<(f32, f32)>,
+    is_disk: bool,
 }
 
 impl BlueNoiseSampler {
-    pub fn new(range: f32, rate: i32) -> Self {
-        let radius = (range / (rate as f32).sqrt()) * 0.8;
-        BlueNoiseSampler {
+    pub fn new(range: f32, rate: i32, disk: bool) -> Self {
+        let radius = (range / (rate as f32).sqrt()) * 1.1;
+
+        let mut ret = BlueNoiseSampler {
             range: range,
             rate: rate,
             radius: radius,
-            rng: rand::thread_rng(),
             points: Vec::new(),
+            is_disk: disk,
+        };
+        // create a sequence of points of blue noise
+        let points = loop {
+            if let Some(x) = ret.generate_seq() {
+                break x;
+            }
+        };
+        ret.points = points;
+        ret
+    }
+
+    fn generate_seq(&mut self) -> Option<Vec<(f32, f32)>> {
+        let mut rng = rand::thread_rng();
+        let mut seq = Vec::new();
+        for _ in 0..self.rate {
+            let mut cnt = 0;
+            loop {
+                if cnt > 10 {
+                    return None; // yield, for another try
+                }
+                let p = (rng.gen::<f32>() * self.range, rng.gen::<f32>() * self.range);
+                if !self.conflict(&p)
+                    && if self.is_disk {
+                        _in_disk(self, &p)
+                    } else {
+                        true
+                    }
+                {
+                    seq.push(p);
+                    break;
+                }
+                cnt += 1;
+            }
         }
+        Some(seq)
     }
 
     fn conflict(&self, p: &(f32, f32)) -> bool {
         for i in self.points.iter() {
-            if sq_dist(p, &i) < self.radius.powi(2) {
+            if sq_dist(p, &i) < (self.radius * 2.0).powi(2) {
                 return true;
             }
         }
@@ -183,22 +239,7 @@ impl BlueNoiseSampler {
 
 impl AreaSampler for BlueNoiseSampler {
     fn sample(&mut self) -> Option<(f32, f32)> {
-        self.rate -= 1;
-        if self.rate >= 0 {
-            let ret = loop {
-                let p = (
-                    self.rng.gen::<f32>() * self.range,
-                    self.rng.gen::<f32>() * self.range,
-                );
-                if !self.conflict(&p) {
-                    self.points.push(p);
-                    break p;
-                }
-            };
-            Some(ret)
-        } else {
-            None
-        }
+        self.points.pop()
     }
 
     fn sample_in_disk(&mut self) -> Option<(f32, f32)> {
@@ -221,9 +262,9 @@ fn _in_disk<T: AreaSampler>(sampler: &mut T, p: &(f32, f32)) -> bool {
 fn _sample_in_disk<T: AreaSampler>(sampler: &mut T) -> Option<(f32, f32)> {
     loop {
         match sampler.sample() {
-            Some(p) => {
+            r @ Some(p) => {
                 if _in_disk(sampler, &p) {
-                    return Some(p);
+                    return r;
                 }
             }
             None => {

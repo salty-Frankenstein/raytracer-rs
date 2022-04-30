@@ -54,6 +54,7 @@ pub struct DiskLight {
     pub origin: Pt3,
     pub radius: f32,
     pub spectrum: RGBSpectrum,
+    pub sampler_kind: SamplerKind,
 }
 
 impl Light for DiskLight {
@@ -62,14 +63,16 @@ impl Light for DiskLight {
         // TODO: refactor
         let mut radiance = BLACK;
         // sample in disk of self.radius
-        // let mut sampler = WhiteNoiseSampler::new(self.radius * 2.0, NS2);
-        // let mut sampler = UniformSampler::new(self.radius * 2.0, NS2);
-        // let mut sampler = JitteredSampler::new(self.radius * 2.0, NS2);
-        let mut sampler = BlueNoiseSampler::new(self.radius * 2.0, NS2);
+        let mut sampler: Box<dyn AreaSampler> = match self.sampler_kind {
+            SamplerKind::WhiteNoise => Box::new(WhiteNoiseSampler::new(self.radius * 2.0, NS2)),
+            SamplerKind::Uniform => Box::new(UniformSampler::new(self.radius * 2.0, NS2)),
+            SamplerKind::Jittered => Box::new(JitteredSampler::new(self.radius * 2.0, NS2)),
+            SamplerKind::BlueNoise => Box::new(BlueNoiseSampler::new(self.radius * 2.0, NS2, true)),
+        };
         let mut actual_sample_num = 0;
         while let Some((a, b)) = sampler.sample_in_disk() {
             actual_sample_num += 1;
-            let origin = self.origin + Vec3::new(a, 0.0, b);
+            let origin = self.origin + Vec3::new(a - self.radius, 0.0, b - self.radius);
             let dir = origin - hit_point;
             let r = Ray {
                 o: hit_point,

@@ -6,20 +6,27 @@ use ray_tracer::*;
 use std::fs::File;
 use std::io::*;
 use std::time::*;
+use std::env;
 
 fn main() -> obj::ObjResult<()> {
     let now = Instant::now();
-    // let scene = Scene::cornell_box()?;
-    let scene = Scene::blue_noise_test();
+    
+    let args: Vec<String> = env::args().collect();
+    let parse_to_io_err = |_| Error::new(ErrorKind::Other, "parse int error");
+    // let pixel_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
+    let light_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
+
+    let scene = Scene::cornell_box(light_samper)?;
+    // let scene = Scene::blue_noise_test();
     let mut output = File::create("./output/out.ppm")?;
 
     writeln!(&mut output, "P3\n{} {}\n255", NX, NY)?;
     for j in (0..NY).rev() {
         for i in 0..NX {
             let mut col = Vec3::new(0.0, 0.0, 0.0);
-            let mut sampler = BlueNoiseSampler::new(1.0, NS);
+            // let mut sampler = BlueNoiseSampler::new(1.0, NS);
             // let mut sampler = JitteredSampler::new(1.0, NS);
-            // let mut sampler = UniformSampler::new(1.0, NS);
+            let mut sampler = UniformSampler::new(1.0, NS);
             // let mut sampler = WhiteNoiseSampler::new(1.0, NS);
             while let Some((a, b)) = sampler.sample() {
                 let u = (i as f32 + a) / NX as f32;
