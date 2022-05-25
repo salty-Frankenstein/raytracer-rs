@@ -182,24 +182,24 @@ impl Scene {
                         //     origin: Pt3::new(0.0, 1.0, -2.0),
                         //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         // }),
-                        // Box::new(DiskLight {
-                        //     origin: Pt3::new(0.0, 1.0, -2.0),
-                        //     radius: 0.4,
-                        //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 2.0,
-                        //     sampler_kind: sampler_kind,
-                        // }),
-                        Box::new(DiskLight {
-                            origin: Pt3::new(-0.45, 1.0, -2.25),
-                            radius: 0.4,
-                            spectrum: RGBSpectrum::new(0.9, 0.0, 0.48) * 2.0,
-                            sampler_kind: sampler_kind
-                        }),
-                        Box::new(DiskLight {
-                            origin: Pt3::new(0.45, 1.0, -1.75),
-                            radius: 0.4,
-                            spectrum: RGBSpectrum::new(0.0, 0.63, 0.48) * 2.0,
-                            sampler_kind: sampler_kind
-                        }),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(0.0, 1.0, -2.0),
+                        //     0.4,
+                        //     RGBSpectrum::new(0.9, 0.64, 0.48) * 5.0,
+                        //     sampler_kind,
+                        // )),
+                        Box::new(DiskLight::new(
+                            Pt3::new(-0.45, 1.0, -2.25),
+                            0.4,
+                            RGBSpectrum::new(0.9, 0.0, 0.48) * 5.0,
+                            sampler_kind,
+                        )),
+                        Box::new(DiskLight::new(
+                            Pt3::new(0.45, 1.0, -1.75),
+                            0.4,
+                            RGBSpectrum::new(0.0, 0.63, 0.48) * 5.0,
+                            sampler_kind,
+                        )),
                     ],
                 },
             },

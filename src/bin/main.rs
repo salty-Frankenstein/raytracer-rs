@@ -16,7 +16,7 @@ fn main() -> obj::ObjResult<()> {
     // let pixel_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
     let light_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
 
-    let scene = Scene::cornell_box(light_samper)?;
+    let mut scene = Scene::cornell_box(light_samper)?;
     // let scene = Scene::blue_noise_test();
     let mut output = File::create("./output/out.ppm")?;
 
@@ -24,9 +24,9 @@ fn main() -> obj::ObjResult<()> {
     for j in (0..NY).rev() {
         for i in 0..NX {
             let mut col = Vec3::new(0.0, 0.0, 0.0);
-            // let mut sampler = BlueNoiseSampler::new(1.0, NS);
+            let mut sampler = BlueNoiseSampler::new(1.0, NS, false);
             // let mut sampler = JitteredSampler::new(1.0, NS);
-            let mut sampler = UniformSampler::new(1.0, NS);
+            // let mut sampler = UniformSampler::new(1.0, NS);
             // let mut sampler = WhiteNoiseSampler::new(1.0, NS);
             while let Some((a, b)) = sampler.sample() {
                 let u = (i as f32 + a) / NX as f32;
@@ -34,7 +34,8 @@ fn main() -> obj::ObjResult<()> {
 
                 let r = scene.cam.get_ray(u, v);
                 // col += normal_shader(&r, &scene.world);
-                col += trace_shader(&r, &scene.world, 0);
+                // col += whitted_trace_shader(&r, &mut scene.world, 0);
+                col += path_trace_shader(&r, &mut scene.world, 0);
             }
             col = &col / NS as f32;
             col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());

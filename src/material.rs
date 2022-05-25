@@ -3,10 +3,15 @@ use crate::light::*;
 use crate::ray::*;
 use crate::*;
 use cgmath::prelude::*;
+use rand::prelude::*;
 
 pub trait Material {
     /// create a scattered ray, or None
     fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray>;
+
+    /// the scatter function for distributed raytracing
+    fn scatter_d(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray>;
+
     /// how much the ray should be attenuated
     fn attenuation(&self) -> RGBSpectrum;
 }
@@ -35,6 +40,9 @@ impl Material for Metal {
         }
     }
 
+    fn scatter_d(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray> {
+        self.scatter(r_in, rec)
+    }
     fn attenuation(&self) -> RGBSpectrum {
         self.albedo
     }
@@ -45,10 +53,35 @@ pub struct Diffuse {
     pub albedo: RGBSpectrum,
 }
 
+// see: http://www.sklogwiki.org/SklogWiki/index.php/Random_vector_on_a_sphere
+fn unit_vec_on_sphere() -> Vec3 {
+    let mut rng = rand::thread_rng();
+    let (r1, r2, rsq) = loop {
+        let r1 = 1.0 - 2.0 * rng.gen::<f32>();
+        let r2 = 1.0 - 2.0 * rng.gen::<f32>();
+        let rsq = r1.powi(2) + r2.powi(2);
+        if rsq < 1.0 {
+            break (r1, r2, rsq);
+        }
+    };
+
+    let rh = 2.0 * (1.0 - rsq).sqrt();
+    Vec3::new(r1 * rh, r2 * rh, 1.0 - 2.0 * rsq)
+}
+
 impl Material for Diffuse {
     fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<Ray> {
         // stop tracing for diffused
         None
+    }
+
+    fn scatter_d(&self, _r_in: &Ray, rec: &HitRecord) -> Option<Ray> {
+        // generate a random unit vector, in the semisphere of the normal vec
+        let mut d = unit_vec_on_sphere();
+        if d.dot(rec.normal) < 0.0 {
+            d = -d;     // semisphere
+        }
+        Some(Ray { o: rec.p, d: d })
     }
 
     fn attenuation(&self) -> RGBSpectrum {
@@ -94,6 +127,10 @@ impl Material for Dielectric {
                 d: reflected,
             }),
         }
+    }
+
+    fn scatter_d(&self, r_in: &Ray, rec: &HitRecord) -> Option<Ray> {
+        self.scatter(r_in, rec)
     }
 
     fn attenuation(&self) -> RGBSpectrum {

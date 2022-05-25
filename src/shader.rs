@@ -18,36 +18,81 @@ pub struct World {
     pub lights: LightList,
 }
 
-/// ray tracing shader
-pub fn trace_shader(r: &Ray, world: &World, depth: i32) -> RGBSpectrum {
+/// whitted-style ray tracing shader
+pub fn whitted_trace_shader(r: &Ray, world: &mut World, depth: i32) -> RGBSpectrum {
     if depth > 40 {
         return BLACK;
     }
 
-    if let Some(direct) = world.lights.hit(r) {
-        return direct;
-    }
-    match world.objects.hit(r, T_MIN, T_MAX) {
-        // intersect, then trace
-        Some(rec) => {
-            let recr = &rec.clone();
-            match rec.mat {
-                Some(m) => match m.scatter(&r, recr) {
-                    // for scatter case, the result is only dependent on the scattered ray
-                    Some(scattered) => {
-                        let t = trace_shader(&scattered, world, depth + 1);
-                        mul_v(&t, &m.attenuation())
-                    }
-                    // for diffuse case, check visibility
-                    // calculate the shadow ray
-                    None => match world.lights.visible(rec.p, rec.normal, &world.objects) {
-                        Some(direct) => mul_v(&direct, &m.attenuation()),
-                        None => BLACK,
+    // hit the objects and the lights, deal with the closer one
+    match (world.objects.hit(r, T_MIN, T_MAX), world.lights.hit(r)) {
+        (Some(rec), lrec) => {
+            if lrec.is_none() || lrec.unwrap().1 > rec.t {
+                let recr = &rec.clone();
+                match rec.mat {
+                    Some(m) => match m.scatter(&r, recr) {
+                        // for scatter case, the result is only dependent on the scattered ray
+                        Some(scattered) => {
+                            let t = whitted_trace_shader(&scattered, world, depth + 1);
+                            mul_v(&t, &m.attenuation())
+                        }
+                        // for diffuse case, check visibility
+                        // calculate the shadow ray
+                        None => match world.lights.visible(rec.p, rec.normal, &world.objects) {
+                            Some(direct) => mul_v(&direct, &m.attenuation()),
+                            None => BLACK,
+                        },
                     },
-                },
-                None => panic!("no material"),
+                    None => panic!("no material"),
+                }
+            } else {
+                lrec.unwrap().0
             }
         }
-        None => BLACK,
+        (None, Some((direct, _))) => direct,
+        (None, None) => BLACK,
+    }
+}
+
+/// distrubuted ray tracing shader, performing path tracing
+pub fn path_trace_shader(r: &Ray, world: &mut World, depth: i32) -> RGBSpectrum {
+    if depth > 40 {
+        return BLACK;
+    }
+
+    // hit the objects and the lights, deal with the closer one
+    match (world.objects.hit(r, T_MIN, T_MAX), world.lights.hit(r)) {
+        (Some(rec), lrec) => {
+            if lrec.is_none() || lrec.unwrap().1 > rec.t {
+                let recr = &rec.clone();
+                match rec.mat {
+                    Some(m) => {
+                        let scattered = match m.scatter_d(&r, recr) {
+                            // for scatter case, the result is only dependent on the scattered ray
+                            Some(scattered) => {
+                                let cos = 1.0;
+                                // let cos = scattered.d.normalize().dot(rec.normal);
+                                let t = path_trace_shader(&scattered, world, depth + 1) * cos;
+                                mul_v(&t, &m.attenuation())
+                            }
+                            None => BLACK,
+                        };
+
+                        // let direct =
+                        //     match world.lights.visible_d(rec.p, rec.normal, &world.objects) {
+                        //         Some(direct) => mul_v(&direct, &m.attenuation()),
+                        //         None => BLACK,
+                        //     };
+                        // scattered + direct
+                        scattered
+                    }
+                    None => panic!("no material"),
+                }
+            } else {
+                lrec.unwrap().0
+            }
+        }
+        (None, Some((direct, _))) => direct,
+        (None, None) => BLACK,
     }
 }

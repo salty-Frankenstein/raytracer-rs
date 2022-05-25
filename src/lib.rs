@@ -19,8 +19,8 @@ pub const T_MIN: f32 = 0.001;
 
 pub const NX: i32 = 800;
 pub const NY: i32 = 800;
-pub const NS: i32 = 4;
-pub const NS2: i32 = 16;
+pub const NS: i32 = 800;
+pub const NS2: i32 = 9;
 
 pub fn mul_v(v1: &Vec3, v2: &Vec3) -> Vec3 {
     Vec3::new(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z)

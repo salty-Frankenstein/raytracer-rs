@@ -7,7 +7,7 @@ rd:
 	./target/debug/main RUST_BACKTRACE=1
 	convert ./output/out.ppm ./output/out.jpg
 rr:
-	./target/release/main 1
+	./target/release/main 4
 	convert ./output/out.ppm ./output/out.jpg
 save:
 	cp ./output/out.jpg ./output/$(FILENAME).jpg

@@ -26,6 +26,7 @@ impl SamplerKind {
 pub trait AreaSampler {
     fn sample(&mut self) -> Option<(f32, f32)>;
     fn sample_in_disk(&mut self) -> Option<(f32, f32)>;
+    fn has_next(&self) -> bool;
     fn get_range(&self) -> f32;
 }
 
@@ -54,6 +55,10 @@ impl WhiteNoiseSampler {
 }
 
 impl AreaSampler for WhiteNoiseSampler {
+    fn has_next(&self) -> bool {
+        self.rate > 0
+    }
+
     fn sample(&mut self) -> Option<(f32, f32)> {
         self.rate -= 1;
         if self.rate >= 0 {
@@ -110,6 +115,10 @@ impl UniformSampler {
 }
 
 impl AreaSampler for UniformSampler {
+    fn has_next(&self) -> bool {
+        self.rate > 0
+    }
+
     fn sample(&mut self) -> Option<(f32, f32)> {
         let ret = if self.rate > 0 {
             Some((self.i, self.j))
@@ -154,6 +163,10 @@ impl JitteredSampler {
 }
 
 impl AreaSampler for JitteredSampler {
+    fn has_next(&self) -> bool {
+        self.uniform_sampler.has_next()
+    }
+
     fn sample(&mut self) -> Option<(f32, f32)> {
         self.uniform_sampler.sample().map(|(a, b)| {
             (
@@ -238,6 +251,10 @@ impl BlueNoiseSampler {
 }
 
 impl AreaSampler for BlueNoiseSampler {
+    fn has_next(&self) -> bool {
+        !self.points.is_empty()
+    }
+
     fn sample(&mut self) -> Option<(f32, f32)> {
         self.points.pop()
     }
