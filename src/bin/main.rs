@@ -1,20 +1,21 @@
-use rand::prelude::*;
 use ray_tracer::sampler::*;
 use ray_tracer::scene::Scene;
 use ray_tracer::shader::*;
 use ray_tracer::*;
+use std::env;
 use std::fs::File;
 use std::io::*;
 use std::time::*;
-use std::env;
 
 fn main() -> obj::ObjResult<()> {
     let now = Instant::now();
-    
     let args: Vec<String> = env::args().collect();
     let parse_to_io_err = |_| Error::new(ErrorKind::Other, "parse int error");
     // let pixel_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
-    let light_samper = args[1].parse::<i32>().map_err(parse_to_io_err).and_then(SamplerKind::from_int)?;
+    let light_samper = args[1]
+        .parse::<i32>()
+        .map_err(parse_to_io_err)
+        .and_then(SamplerKind::from_int)?;
 
     let mut scene = Scene::cornell_box(light_samper)?;
     // let scene = Scene::blue_noise_test();
@@ -35,7 +36,8 @@ fn main() -> obj::ObjResult<()> {
                 let r = scene.cam.get_ray(u, v);
                 // col += normal_shader(&r, &scene.world);
                 // col += whitted_trace_shader(&r, &mut scene.world, 0);
-                col += path_trace_shader(&r, &mut scene.world, 0);
+                // col += path_trace_shader(&r, &mut scene.world, 0);
+                col += path_trace_shader_mis(&r, &mut scene.world, 0);
             }
             col = &col / NS as f32;
             col = Vec3::new(col.x.sqrt(), col.y.sqrt(), col.z.sqrt());

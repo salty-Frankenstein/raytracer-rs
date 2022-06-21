@@ -70,21 +70,60 @@ pub fn path_trace_shader(r: &Ray, world: &mut World, depth: i32) -> RGBSpectrum 
                         let scattered = match m.scatter_d(&r, recr) {
                             // for scatter case, the result is only dependent on the scattered ray
                             Some(scattered) => {
-                                let cos = 1.0;
-                                // let cos = scattered.d.normalize().dot(rec.normal);
-                                let t = path_trace_shader(&scattered, world, depth + 1) * cos;
+                                let t = path_trace_shader(&scattered, world, depth + 1);
                                 mul_v(&t, &m.attenuation())
                             }
                             None => BLACK,
                         };
 
-                        // let direct =
-                        //     match world.lights.visible_d(rec.p, rec.normal, &world.objects) {
-                        //         Some(direct) => mul_v(&direct, &m.attenuation()),
-                        //         None => BLACK,
-                        //     };
-                        // scattered + direct
                         scattered
+                    }
+                    None => panic!("no material"),
+                }
+            } else {
+                lrec.unwrap().0
+            }
+        }
+        (None, Some((direct, _))) => direct,
+        (None, None) => BLACK,
+    }
+}
+
+/// with MIS sampling
+pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpectrum {
+    if depth > 40 {
+        return BLACK;
+    }
+
+    // hit the objects and the lights, deal with the closer one
+    match (world.objects.hit(r, T_MIN, T_MAX), world.lights.hit(r)) {
+        (Some(rec), lrec) => {
+            if lrec.is_none() || lrec.unwrap().1 > rec.t {
+                let recr = &rec.clone();
+                match rec.mat {
+                    Some(m) => {
+                        let brdf = match m.scatter_d(&r, recr) {
+                            // for scatter case, the result is only dependent on the scattered ray
+                            Some(scattered) => {
+                                let li = path_trace_shader(&scattered, world, depth + 1);
+                                let l_pdf = world.lights.pdf(&scattered);
+                                let b_pdf = m.pdf(scattered.d, r.d, rec.normal);
+                                mul_v(&li, &m.brdf(scattered.d, r.d, rec.normal)) / (l_pdf + b_pdf)
+                            }
+                            None => BLACK,
+                        };
+
+                        let direct = match world.lights.visible_d(rec.p, rec.normal, &world.objects)
+                        {
+                            Some(LSampleRec { ray, radiance, p }) => {
+                                let b_pdf = m.pdf(ray.d, r.d, rec.normal);
+                                mul_v(&radiance, &m.brdf(ray.d, r.d, rec.normal)) / (p + b_pdf)
+                            }
+                            None => BLACK,
+                        };
+                        brdf + direct
+                        // direct
+                        // brdf
                     }
                     None => panic!("no material"),
                 }

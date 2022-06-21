@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Clone, Copy)]
 pub struct Ray {
     pub o: Pt3,
     pub d: Vec3,
