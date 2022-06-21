@@ -196,9 +196,13 @@ impl Light for DiskLight {
                 d: dir,
             };
             if world.hit(&r, T_MIN, 1.0 - T_MIN).is_none() {
-                let radiance =
-                    // self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir);
-                    self.spectrum * dir.normalize().dot(normal.normalize());
+                let cos = dir.normalize().dot(normal.normalize());
+                let radiance = if cos > 0.0 {
+                    self.spectrum * cos
+                } else {
+                    BLACK
+                };
+                // self.spectrum * dir.normalize().dot(normal.normalize()) / dir.dot(dir);
                 // TODO: check this one
                 ret = Some(LSampleRec::new(&r, radiance, self._pdf(dir, dir.dot(dir))));
             }

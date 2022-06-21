@@ -52,10 +52,10 @@ impl Scene {
     pub fn cornell_box(sampler_kind: SamplerKind) -> obj::ObjResult<Scene> {
         let mut pyramid = load_obj_file(
             String::from("./input/pyramid.obj"),
-            // Dielectric {ref_idx: 1.8}
-            Metal {
-                albedo: Vec3::new(1.0, 1.0, 1.0),
-            },
+            Dielectric {ref_idx: 1.8}
+            // Metal {
+            //     albedo: Vec3::new(1.0, 1.0, 1.0),
+            // },
         )?;
         pyramid.scale(8.0);
         pyramid.rotate(0.0, -15.0, 0.0);
@@ -66,7 +66,6 @@ impl Scene {
         // miku.rotate(-90.0, 0.0, -35.0);
         // miku.displacement(Vec3::new(0.5, -0.97, -1.3));
 
-        /*
         let mut miku2 = load_obj_file(
             String::from("./input/.miku2.obj"),
             // Dielectric{ref_idx: 1.8}
@@ -84,7 +83,7 @@ impl Scene {
             // },
         )?;
         miku3.transform(0.06, Vec3::new(-0.5, -1.0, -1.5), -90.0, 0.0, 35.0);
-        */
+        
         let mut utah = load_obj_file(
             String::from("./input/utah.obj"),
             // Dielectric { ref_idx: 1.8 },
@@ -132,10 +131,10 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        // Box::new(utah),
+                        Box::new(utah),
                         // Box::new(miku),
-                        // Box::new(miku2),
-                        // Box::new(miku3),
+                        Box::new(miku2),
+                        Box::new(miku3),
                         Box::new(pyramid),
                         Box::new(t1),
                         Box::new(t2),

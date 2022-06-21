@@ -184,12 +184,19 @@ impl Dielectric {
         let din = din.normalize();
         let dout = dout.normalize();
         match refract(din, outward_normal, ni_over_nt) {
-            Some(refracted) => None, // TODO
+            Some(refracted) => {
+                let d = refracted - dout;
+                if d.dot(d) < T_MIN {
+                    Some(RGBSpectrum::new(1.0, 1.0, 1.0))
+                }
+                else {
+                    None
+                }
+            }
             None => {
                 // reflect
-                if (din + dout).dot(dnor) < T_MIN {
+                if (din + dout).dot(dnor).abs() < T_MIN {
                     Some(RGBSpectrum::new(1.0, 1.0, 1.0))
-                    // BLACK
                 } else {
                     None
                 }
@@ -238,8 +245,7 @@ impl Material for Dielectric {
         if let Some(_) = self._brdf(din, dout, dnor) {
             1.0
         } else {
-            1.0
-            // ZERO
+            ZERO
         }
     }
 

@@ -105,10 +105,10 @@ pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpect
                         let brdf = match m.scatter_d(&r, recr) {
                             // for scatter case, the result is only dependent on the scattered ray
                             Some(scattered) => {
-                                let li = path_trace_shader(&scattered, world, depth + 1);
+                                let li = path_trace_shader_mis(&scattered, world, depth + 1);
                                 let l_pdf = world.lights.pdf(&scattered);
-                                let b_pdf = m.pdf(scattered.d, r.d, rec.normal);
-                                mul_v(&li, &m.brdf(scattered.d, r.d, rec.normal)) / (l_pdf + b_pdf)
+                                let b_pdf = m.pdf(r.d, scattered.d, rec.normal);
+                                mul_v(&li, &m.brdf(r.d, scattered.d, rec.normal)) / (l_pdf + b_pdf)
                             }
                             None => BLACK,
                         };
@@ -116,12 +116,12 @@ pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpect
                         let direct = match world.lights.visible_d(rec.p, rec.normal, &world.objects)
                         {
                             Some(LSampleRec { ray, radiance, p }) => {
-                                let b_pdf = m.pdf(ray.d, r.d, rec.normal);
-                                mul_v(&radiance, &m.brdf(ray.d, r.d, rec.normal)) / (p + b_pdf)
+                                let b_pdf = m.pdf(r.d, ray.d, rec.normal);
+                                mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p + b_pdf)
                             }
                             None => BLACK,
                         };
-                        brdf + direct
+                        brdf + direct 
                         // direct
                         // brdf
                     }
