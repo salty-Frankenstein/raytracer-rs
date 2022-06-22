@@ -83,7 +83,6 @@ impl Scene {
             // },
         )?;
         miku3.transform(0.06, Vec3::new(-0.5, -1.0, -1.5), -90.0, 0.0, 35.0);
-        
         let mut utah = load_obj_file(
             String::from("./input/utah.obj"),
             // Dielectric { ref_idx: 1.8 },
@@ -182,25 +181,24 @@ impl Scene {
                         //     origin: Pt3::new(0.0, 1.0, -2.0),
                         //     spectrum: RGBSpectrum::new(0.9, 0.64, 0.48) * 1.8,
                         // }),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(0.0, 1.0, -2.0),
+                        //     0.4,
+                        //     RGBSpectrum::new(0.9, 0.64, 0.48) * 6.0,
+                        //     sampler_kind,
+                        // )),
                         Box::new(DiskLight::new(
-                            Pt3::new(0.0, 1.0, -2.0),
+                            Pt3::new(-0.45, 1.0, -2.25),
                             0.4,
-                            RGBSpectrum::new(0.9, 0.64, 0.48) * 6.0,
+                            RGBSpectrum::new(0.9, 0.0, 0.48) * 6.0,
                             sampler_kind,
                         )),
-                        // Box::new(DiskLight::new(
-                        //     Pt3::new(-0.45, 1.0, -2.25),
-                        //     0.4,
-                        //     RGBSpectrum::new(0.9, 0.0, 0.48) * 5.0,
-                        //     sampler_kind,
-                        // )),
-                        // Box::new(DiskLight::new(
-                        //     Pt3::new(0.45, 1.0, -1.75),
-                        //     0.4,
-                        //     RGBSpectrum::new(0.0, 0.63, 0.48) * 5.0,
-                        //     sampler_kind,
-                        // )),
-                        // Box::new(PolygonLight::new(utah, RGBSpectrum::new(1.0, 1.0, 1.0) * 5.0)),
+                        Box::new(DiskLight::new(
+                            Pt3::new(0.45, 1.0, -1.75),
+                            0.4,
+                            RGBSpectrum::new(0.0, 0.63, 0.48) * 6.0,
+                            sampler_kind,
+                        )),
                     ],
                 },
             },
@@ -253,5 +251,156 @@ impl Scene {
             },
         };
         s
+    }
+
+    pub fn light_test(sampler_kind: SamplerKind) -> Scene {
+        let ceiling = -0.5;
+        let ground = -0.57;
+        let brightness = 8.0;
+        let sq = (
+            Pt3::new(-1.0, ground, -1.0),
+            Pt3::new(1.0, ground, -1.0),
+            Pt3::new(1.0, ground, -3.0),
+            Pt3::new(-1.0, ground, -3.0),
+        );
+        let (t1, t2) = make_square(sq, RGBSpectrum::new(1.0, 1.0, 1.0));
+        // let dummy_mat = Dielectric { ref_idx: 0.0 };
+        let dummy_mat = Rc::new(Dielectric { ref_idx: 0.0 });
+
+        let triangle = vec![Triangle {
+            vertex: (
+                Pt3::new(-0.15, ceiling, -2.15),
+                Pt3::new(0.15, ceiling, -2.15),
+                Pt3::new(0.0, ceiling, -1.85),
+            ),
+            mat: dummy_mat.clone(),
+        }];
+        let triangle_acc = FromFaceList::from_face_list(&triangle);
+        let triangle_mesh = NaiveMesh {
+            face_list: triangle,
+            acc_structure: triangle_acc,
+        };
+
+        let interval = 0.6;
+        let (t3, t4) = make_square(
+            (
+                Pt3::new(-0.1 + interval, ceiling, -1.9),
+                Pt3::new(0.1 + interval, ceiling, -1.9),
+                Pt3::new(0.1 + interval, ceiling, -2.1),
+                Pt3::new(-0.1 + interval, ceiling, -2.1),
+            ),
+            BLACK,
+        );
+        let square = vec![t3, t4];
+        let square_acc = FromFaceList::from_face_list(&square);
+        let square_mesh = NaiveMesh {
+            face_list: square,
+            acc_structure: square_acc,
+        };
+
+        let hexagon = vec![
+            Triangle {
+                vertex: (
+                    Pt3::new(-0.1 - interval, ceiling, -2.17),
+                    Pt3::new(0.1 - interval, ceiling, -2.17),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },
+            Triangle {
+                vertex: (
+                    Pt3::new(0.1 - interval, ceiling, -2.17),
+                    Pt3::new(0.2 - interval, ceiling, -2.0),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },
+            Triangle {
+                vertex: (
+                    Pt3::new(-0.2 - interval, ceiling, -2.0),
+                    Pt3::new(-0.1 - interval, ceiling, -2.17),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },
+            Triangle {
+                vertex: (
+                    Pt3::new(0.1 - interval, ceiling, -1.83),
+                    Pt3::new(-0.1 - interval, ceiling, -1.83),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },
+            Triangle {
+                vertex: (
+                    Pt3::new(0.2 - interval, ceiling, -2.0),
+                    Pt3::new(0.1 - interval, ceiling, -1.83),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },            
+            Triangle {
+                vertex: (
+                    Pt3::new(-0.1 - interval, ceiling, -1.83),
+                    Pt3::new(-0.2 - interval, ceiling, -2.0),
+                    Pt3::new(0.0 - interval, ceiling, -2.0),
+                ),
+                mat: dummy_mat.clone(),
+            },
+        ];
+        let hexagon_acc = FromFaceList::from_face_list(&hexagon);
+        let hexagon_mesh = NaiveMesh {
+            face_list: hexagon,
+            acc_structure: hexagon_acc,
+        };
+
+        Scene {
+            cam: Camera::new(
+                Pt3::new(0.0, 1.5, 3.0),
+                Pt3::new(0.0, 0.0, -1.0),
+                Vec3::new(0.0, 1.0, 0.0),
+                90.0,
+                NX as f32 / NY as f32,
+            ),
+            world: World {
+                objects: HitableList {
+                    list: vec![Box::new(t1), Box::new(t2)],
+                },
+                lights: LightList {
+                    list: vec![
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(0.6, ceiling, -2.0),
+                        //     0.1,
+                        //     RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        //     sampler_kind,
+                        // )),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(0.0, ceiling, -2.0),
+                        //     0.1,
+                        //     RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        //     sampler_kind,
+                        // )),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(-0.6, ceiling, -2.0),
+                        //     0.1,
+                        //     RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        //     sampler_kind,
+                        // )),
+                        Box::new(PolygonLight::new(
+                            triangle_mesh,
+                            RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        )),
+                        Box::new(PolygonLight::new(
+                            square_mesh,
+                            RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        )),
+                        Box::new(PolygonLight::new(
+                            hexagon_mesh,
+                            RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        )),
+                    ],
+                },
+            },
+        }
     }
 }

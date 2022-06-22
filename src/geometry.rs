@@ -18,16 +18,20 @@ impl Triangle {
             .cross(self.vertex.2 - self.vertex.0)
             .normalize()
     }
-}
 
-impl Hitable for Triangle {
-    fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    pub fn area(&self) -> f32 {
+        let c = (self.vertex.1 - self.vertex.0).cross(self.vertex.2 - self.vertex.0);
+        0.5 * c.dot(c).sqrt()
+    }
+
+    /// the last parameter decides whether the triangle can be hit both side
+    fn _hit(&self, r: &Ray, t_min: f32, t_max: f32, both_side: bool) -> Option<HitRecord> {
         let _E1 = self.vertex.1 - self.vertex.0;
         let _E2 = self.vertex.2 - self.vertex.0;
         let _P = r.d.cross(_E2);
         let det = _P.dot(_E1);
         // TODO
-        if det < 0.0 {
+        if !both_side && det < 0.0 {
             return None;
         }
         if det == 0.0 {
@@ -55,6 +59,16 @@ impl Hitable for Triangle {
             // normal: self.normal(),
             mat: Some(self.mat.clone()),
         })
+    }
+
+    pub fn hit_both_side(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        self._hit(r, t_min, t_max, true)
+    }
+}
+
+impl Hitable for Triangle {
+    fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        self._hit(r, t_min, t_max, false)
     }
 }
 
@@ -119,7 +133,8 @@ impl Hitable for Cylinder {
         let hit_top = t_top > t_min && t_top < t_max && d_top.dot(d_top) < self.radius.powi(2);
         let p_bottom = r.point_at_parameter(t_bottom);
         let d_bottom = Vec2::new(p_bottom.x - self.center_x, p_bottom.z - self.center_z);
-        let hit_bottom = t_bottom > t_min && t_bottom < t_max && d_bottom.dot(d_bottom) < self.radius.powi(2);
+        let hit_bottom =
+            t_bottom > t_min && t_bottom < t_max && d_bottom.dot(d_bottom) < self.radius.powi(2);
 
         let dxz = Vec2::new(r.d.x, r.d.z);
         let oxz = Vec2::new(r.o.x - self.center_x, r.o.z - self.center_z);

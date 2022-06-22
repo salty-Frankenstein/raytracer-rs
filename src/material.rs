@@ -185,6 +185,7 @@ impl Dielectric {
         let dout = dout.normalize();
         match refract(din, outward_normal, ni_over_nt) {
             Some(refracted) => {
+                // TODO: with `vec_eq`
                 let d = refracted - dout;
                 if d.dot(d) < T_MIN {
                     Some(RGBSpectrum::new(1.0, 1.0, 1.0))

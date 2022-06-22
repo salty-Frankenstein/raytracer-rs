@@ -61,6 +61,27 @@ impl<T: FromFaceList> Mesh<T> {
 pub struct Naive;
 pub type NaiveMesh = Mesh<Naive>;
 
+// TODO: refactor & add this method to all Mesh types
+impl NaiveMesh {
+    pub fn hit_both_side(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        let mut hit_anything = false;
+        let mut closest_so_far = t_max;
+        let mut rec = EMPTY_REC;
+        for i in self.face_list.iter() {
+            if let Some(temp_rec) = i.hit_both_side(r, t_min, closest_so_far) {
+                hit_anything = true;
+                closest_so_far = temp_rec.t;
+                rec = temp_rec;
+            }
+        }
+        if hit_anything {
+            Some(rec)
+        } else {
+            None
+        }
+    }
+}
+
 impl Hitable for NaiveMesh {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         hit_list(&self.face_list, r, t_min, t_max)

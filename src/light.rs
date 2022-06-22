@@ -1,3 +1,4 @@
+use crate::geometry::*;
 use crate::hitable::*;
 use crate::mesh::*;
 use crate::ray::*;
@@ -236,19 +237,53 @@ impl Light for DiskLight {
     }
 }
 
-type MeshT = FastMesh;
+type MeshT = NaiveMesh;
 pub struct PolygonLight {
     mesh: MeshT,
     spectrum: RGBSpectrum,
+    area: f32,
+    normal: Vec3,
 }
 
 impl PolygonLight {
+    /// XXX: only 2D mesh is supported,
+    /// that is all normal vectors should be the same
     pub fn new(mesh: MeshT, spectrum: RGBSpectrum) -> Self {
+        // let area = mesh.face_list.iter().fold(0.0, |sum, x| sum + x.area());
+        let mut area = 0.0;
+        let normal = mesh.face_list[0].normal();
+        for t in mesh.face_list.iter() {
+            area += t.area();
+            assert!(
+                vec_eq(&normal, &t.normal()),
+                "the mesh of PolygonLight is not 2D!"
+            );
+        }
         PolygonLight {
             mesh: mesh,
             spectrum: spectrum,
+            area: area,
+            normal: normal,
         }
     }
+}
+
+/// see: https://www.pbr-book.org/3ed-2018/Monte_Carlo_Integration/
+/// 2D_Sampling_with_Multidimensional_Transformations#SamplingaTriangle
+fn sample_in_triangle(triangle: &Triangle) -> Pt3 {
+    let mut rng = rand::thread_rng();
+    let e1 = rng.gen::<f32>();
+    let e2 = rng.gen::<f32>();
+    let se1 = e1.sqrt();
+    // uniform sample in barycentric coordinate
+    let b = Pt2::new(1.0 - se1, e2 * se1);
+
+    let p0 = triangle.vertex.0.to_vec();
+    let p1 = triangle.vertex.1.to_vec();
+    let p2 = triangle.vertex.2.to_vec();
+
+    let res = b.x * p0 + b.y * p1 + (1.0 - b.x - b.y) * p2;
+    Pt3::from_vec(res)
 }
 
 /// implement light for mesh (polygon light)
@@ -270,19 +305,43 @@ impl Light for PolygonLight {
         normal: Vec3,
         world: &HitableList,
     ) -> Option<LSampleRec> {
-        // TODO
-        assert!(false);
-        None
+        // randomly select a triangle face
+        let t = self.mesh.face_list.choose_mut(&mut rand::thread_rng())?;
+        // get a uniform sample point on it
+        let origin = sample_in_triangle(t);
+        // generate a ray from the hitting point
+        let dir = origin - hit_point;
+        let r = Ray {
+            o: hit_point,
+            d: dir,
+        };
+        // TODO: check hitting other lights also
+        if world.hit(&r, T_MIN, 1.0 - T_MIN).is_none() {
+            let cos = dir.normalize().dot(normal.normalize());
+            let radiance = if cos > 0.0 {
+                self.spectrum * cos
+            } else {
+                BLACK
+            };
+            // TODO:
+            Some(LSampleRec::new(&r, radiance, self.pdf(&r)))
+        } else {
+            None
+        }
     }
 
     fn pdf(&self, r: &Ray) -> f32 {
-        // TODO
-        assert!(false);
-        0.0
+        if let Some((_, t)) = self.hit(r) {
+            let sq_dist = t.powi(2) * r.d.dot(r.d);
+            let cosine = r.d.dot(self.normal).abs();
+            sq_dist / (cosine * self.area)
+        } else {
+            ZERO
+        }
     }
 
     fn hit(&self, r: &Ray) -> Option<(RGBSpectrum, f32)> {
-        self.mesh.hit(r, T_MIN, T_MAX).map(|r| (self.spectrum, r.t))
+        self.mesh.hit_both_side(r, T_MIN, T_MAX).map(|r| (self.spectrum, r.t))
     }
 }
 
