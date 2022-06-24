@@ -28,6 +28,18 @@ fn make_square(vertex: (Pt3, Pt3, Pt3, Pt3), albedo: RGBSpectrum) -> (Triangle, 
     (t1, t2)
 }
 
+fn make_mf_square(vertex: (Pt3, Pt3, Pt3, Pt3), m: Microfacet) -> (Triangle, Triangle) {
+    let t1 = Triangle {
+        vertex: (vertex.0, vertex.1, vertex.2),
+        mat: Rc::new(m.clone()),
+    };
+    let t2 = Triangle {
+        vertex: (vertex.0, vertex.2, vertex.3),
+        mat: Rc::new(m),
+    };
+    (t1, t2)
+}
+
 fn make_chess_board(vertex: (Pt3, Pt3, Pt3, Pt3), num: i32) -> Vec<Triangle> {
     let ori = vertex.0.to_vec();
     let vi = (vertex.1 - vertex.0) / num as f32;
@@ -199,7 +211,7 @@ impl Scene {
                             // }),
                             mat: Rc::new(Microfacet {
                                 f0: RGBSpectrum::new(0.18, 0.18, 0.18),
-                                roughness: 0.3,
+                                roughness: 0.1,
                                 metallic: 0.2,
                                 attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
                             }),
@@ -441,6 +453,153 @@ impl Scene {
                         Box::new(PolygonLight::new(
                             hexagon_mesh,
                             RGBSpectrum::new(0.9, 0.64, 0.48) * brightness,
+                        )),
+                    ],
+                },
+            },
+        }
+    }
+
+    pub fn mis_test(sampler_kind: SamplerKind) -> Scene {
+        let ceiling = 2.0;
+        let ground = -1.0;
+        let width = 2.0;
+        let front = -1.0;
+        let back = -4.0;
+        let brightness = 20.0;
+        let sq1 @ (_, _, v3, v4) = (
+            Pt3::new(-width, ground, front),
+            Pt3::new(width, ground, front),
+            Pt3::new(width, ground, back),
+            Pt3::new(-width, ground, back),
+        );
+        let (t1, t2) = make_square(sq1, RGBSpectrum::new(0.6, 0.6, 0.6));
+        let (_, _, v7, v8) = (
+            Pt3::new(-width, ceiling, front),
+            Pt3::new(width, ceiling, front),
+            Pt3::new(width, ceiling, back),
+            Pt3::new(-width, ceiling, back),
+        );
+        let (t3, t4) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.6, 0.6, 0.6));
+
+        let bar_width = 1.2;
+        let bar1 = (
+            Pt3::new(-bar_width, ground + 0.07, -1.6),
+            Pt3::new(bar_width, ground + 0.07, -1.6),
+            Pt3::new(bar_width, ground + 0.16, -2.1),
+            Pt3::new(-bar_width, ground + 0.16, -2.1),
+        );
+        let (t5, t6) = make_mf_square(
+            bar1,
+            Microfacet {
+                f0: RGBSpectrum::new(0.9, 0.9, 0.9),
+                roughness: 0.3,
+                metallic: 0.9,
+                attenuation: RGBSpectrum::new(0.3, 0.3, 0.3),
+            },
+        );
+
+        let bar2 = (
+            Pt3::new(-bar_width, ground + 0.16, -2.1 - 0.25),
+            Pt3::new(bar_width, ground + 0.16, -2.1 - 0.25),
+            Pt3::new(bar_width, ground + 0.295, -2.75),
+            Pt3::new(-bar_width, ground + 0.295, -2.75),
+        );
+        let (t7, t8) = make_mf_square(
+            bar2,
+            Microfacet {
+                f0: RGBSpectrum::new(0.9, 0.9, 0.9),
+                roughness: 0.25,
+                metallic: 0.9,
+                attenuation: RGBSpectrum::new(0.3, 0.3, 0.3),
+            },
+        );
+
+        let bar3 = (
+            Pt3::new(-bar_width, ground + 0.3, -2.75 - 0.25),
+            Pt3::new(bar_width, ground + 0.3, -2.75 - 0.25),
+            Pt3::new(bar_width, ground + 0.5, -3.35),
+            Pt3::new(-bar_width, ground + 0.5, -3.35),
+        );
+        let (t9, t10) = make_mf_square(
+            bar3,
+            Microfacet {
+                f0: RGBSpectrum::new(0.9, 0.9, 0.9),
+                roughness: 0.2,
+                metallic: 0.1,
+                attenuation: RGBSpectrum::new(0.3, 0.3, 0.3),
+            },
+        );
+
+        let bar4 = (
+            Pt3::new(-bar_width, ground + 0.5, -3.45 - 0.2),
+            Pt3::new(bar_width, ground + 0.5, -3.45 - 0.2),
+            Pt3::new(bar_width, ground + 0.775, -3.9),
+            Pt3::new(-bar_width, ground + 0.775, -3.9),
+        );
+        let (t11, t12) = make_mf_square(
+            bar4,
+            Microfacet {
+                f0: RGBSpectrum::new(0.9, 0.9, 0.9),
+                roughness: 0.1,
+                metallic: 0.9,
+                attenuation: RGBSpectrum::new(0.3, 0.3, 0.3),
+            },
+        );
+
+        let interval = 0.7;
+        let st = interval / 2.0;
+
+        Scene {
+            cam: Camera::new(
+                Pt3::new(0.0, 1.0, 3.0),
+                Pt3::new(0.0, 0.0, -1.0),
+                Vec3::new(0.0, 1.0, 0.0),
+                90.0,
+                NX as f32 / NY as f32,
+            ),
+            world: World {
+                objects: HitableList {
+                    list: vec![
+                        Box::new(t1),
+                        Box::new(t2),
+                        Box::new(t3),
+                        Box::new(t4),
+                        Box::new(t5),
+                        Box::new(t6),
+                        Box::new(t7),
+                        Box::new(t8),
+                        Box::new(t9),
+                        Box::new(t10),
+                        Box::new(t11),
+                        Box::new(t12),
+                    ],
+                },
+                lights: LightList {
+                    list: vec![
+                        Box::new(DiskLight::new(
+                            Pt3::new(st - interval * 2.0, 0.5, -3.5),
+                            0.02,
+                            RGBSpectrum::new(0.9, 0.4, 0.6) * 150.0,
+                            sampler_kind,
+                        )),
+                        Box::new(DiskLight::new(
+                            Pt3::new(st - interval, 0.5, -3.5),
+                            0.05,
+                            RGBSpectrum::new(0.9, 0.7, 0.3) * 60.0,
+                            sampler_kind,
+                        )),
+                        Box::new(DiskLight::new(
+                            Pt3::new(st, 0.5, -3.5),
+                            0.1,
+                            RGBSpectrum::new(0.6, 0.9, 0.4) * 40.0,
+                            sampler_kind,
+                        )),
+                        Box::new(DiskLight::new(
+                            Pt3::new(st + interval, 0.5, -3.5),
+                            0.2,
+                            RGBSpectrum::new(0.4, 0.6, 0.9) * 20.0,
+                            sampler_kind,
                         )),
                     ],
                 },

@@ -18,8 +18,8 @@ pub const T_MAX: f32 = 10000000.0;
 pub const T_MIN: f32 = 0.001;
 const ZERO: f32 = f32::EPSILON;
 
-pub const NX: i32 = 200;
-pub const NY: i32 = 200;
+pub const NX: i32 = 800;
+pub const NY: i32 = 800;
 pub const NS: i32 = 10;
 pub const NS2: i32 = 9;
 

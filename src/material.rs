@@ -299,7 +299,7 @@ fn fresnel_schlick(din: Vec3, dnor: Vec3, f0: Vec3) -> Vec3 {
 }
 
 fn half_vec(v1: &Vec3, v2: &Vec3) -> Vec3 {
-    v1 + v2.normalize()
+    (v1 + v2).normalize()
 }
 
 #[derive(Clone)]
@@ -442,7 +442,7 @@ impl Material for Microfacet {
             Some(LSampleRec { ray, radiance, p }) => {
                 let b_pdf = self.pdf(r.d, ray.d, rec.normal);
                 mul_v(&radiance, &self.brdf(r.d, ray.d, rec.normal)) / (p + b_pdf)
-                // mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p)
+                // mul_v(&radiance, &self.brdf(r.d, ray.d, rec.normal)) / (p)
             }
             None => BLACK,
         };
