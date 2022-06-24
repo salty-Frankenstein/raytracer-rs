@@ -109,6 +109,7 @@ pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpect
                                 let l_pdf = world.lights.pdf(&scattered);
                                 let b_pdf = m.pdf(r.d, scattered.d, rec.normal);
                                 mul_v(&li, &m.brdf(r.d, scattered.d, rec.normal)) / (l_pdf + b_pdf)
+                                // mul_v(&li, &m.brdf(r.d, scattered.d, rec.normal)) / (b_pdf)
                             }
                             None => BLACK,
                         };
@@ -118,6 +119,7 @@ pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpect
                             Some(LSampleRec { ray, radiance, p }) => {
                                 let b_pdf = m.pdf(r.d, ray.d, rec.normal);
                                 mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p + b_pdf)
+                                // mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p)
                             }
                             None => BLACK,
                         };

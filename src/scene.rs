@@ -104,11 +104,11 @@ impl Scene {
             Pt3::new(1.0, 1.0, -3.0),
             Pt3::new(-1.0, 1.0, -3.0),
         );
-        let (t1, t2) = make_square((v1, v2, v3, v4), RGBSpectrum::new(0.8, 0.8, 0.8));
-        let (t3, t4) = make_square((v5, v8, v7, v6), RGBSpectrum::new(0.8, 0.8, 0.8));
-        // let (t5, t6) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.8, 0.8, 0.8));
-        let (t7, t8) = make_square((v1, v4, v8, v5), RGBSpectrum::new(0.8, 0.0, 0.0));
-        let (t9, t10) = make_square((v3, v2, v6, v7), RGBSpectrum::new(0.0, 0.8, 0.0));
+        let (t1, t2) = make_square((v1, v2, v3, v4), RGBSpectrum::new(0.9, 0.9, 0.9));
+        let (t3, t4) = make_square((v5, v8, v7, v6), RGBSpectrum::new(0.9, 0.9, 0.9));
+        let (t5, t6) = make_square((v4, v3, v7, v8), RGBSpectrum::new(0.9, 0.9, 0.9));
+        let (t7, t8) = make_square((v1, v4, v8, v5), RGBSpectrum::new(0.7, 0.0, 0.0));
+        let (t9, t10) = make_square((v3, v2, v6, v7), RGBSpectrum::new(0.0, 0.4, 0.0));
         let chess_board = make_chess_board((v4, v3, v7, v8), 12);
         let acc = FromFaceList::from_face_list(&chess_board);
         let mut chess_board_mesh = FastMesh {
@@ -116,6 +116,22 @@ impl Scene {
             acc_structure: acc,
         };
         chess_board_mesh.rotate(0.01, 0.0, 0.0); // avoid abnormal triangles
+
+        let (t11, t12) = make_square(
+            (
+                Pt3::new(-0.22, 1.0, -2.22),
+                Pt3::new(0.22, 1.0, -2.22),
+                Pt3::new(0.22, 1.0, -1.78),
+                Pt3::new(-0.22, 1.0, -1.78),
+            ),
+            BLACK,
+        );
+        let square = vec![t11, t12];
+        let square_acc = FromFaceList::from_face_list(&square);
+        let square_mesh = NaiveMesh {
+            face_list: square,
+            acc_structure: square_acc,
+        };
         let s = Scene {
             cam: Camera::new(
                 // Pt3::new(0.0, 10.0, 0.0),
@@ -130,18 +146,18 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        Box::new(utah),
+                        // Box::new(utah),
                         // Box::new(miku),
-                        Box::new(miku2),
-                        Box::new(miku3),
+                        // Box::new(miku2),
+                        // Box::new(miku3),
                         Box::new(pyramid),
                         Box::new(t1),
                         Box::new(t2),
                         Box::new(t3),
                         Box::new(t4),
-                        // Box::new(t5),
-                        // Box::new(t6),
-                        Box::new(chess_board_mesh),
+                        Box::new(t5),
+                        Box::new(t6),
+                        // Box::new(chess_board_mesh),
                         Box::new(t7),
                         Box::new(t8),
                         Box::new(t9),
@@ -152,16 +168,28 @@ impl Scene {
                             radius: 0.4,
                             y_max: -0.5,
                             y_min: -1.0,
-                            mat: Rc::new(Metal {
-                                albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
+                            // mat: Rc::new(Metal {
+                            //     albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
+                            // }),
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
+                                roughness: 0.13,
+                                metallic: 0.9,
+                                attenuation: RGBSpectrum::new(0.8, 0.8, 0.8),
                             }),
                         }),
                         Box::new(Sphere {
                             center: Vec3::new(-0.34, 0.38, -2.0),
                             radius: 0.25,
                             // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
-                            mat: Rc::new(Metal {
-                                albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
+                            // mat: Rc::new(Metal {
+                            //     albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
+                            // }),
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
+                                roughness: 0.21,
+                                metallic: 0.9,
+                                attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
                             }),
                         }),
                     ],
@@ -187,18 +215,22 @@ impl Scene {
                         //     RGBSpectrum::new(0.9, 0.64, 0.48) * 6.0,
                         //     sampler_kind,
                         // )),
-                        Box::new(DiskLight::new(
-                            Pt3::new(-0.45, 1.0, -2.25),
-                            0.4,
-                            RGBSpectrum::new(0.9, 0.0, 0.48) * 6.0,
-                            sampler_kind,
-                        )),
-                        Box::new(DiskLight::new(
-                            Pt3::new(0.45, 1.0, -1.75),
-                            0.4,
-                            RGBSpectrum::new(0.0, 0.63, 0.48) * 6.0,
-                            sampler_kind,
-                        )),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(-0.45, 1.0, -2.25),
+                        //     0.4,
+                        //     RGBSpectrum::new(0.9, 0.0, 0.48) * 6.0,
+                        //     sampler_kind,
+                        // )),
+                        // Box::new(DiskLight::new(
+                        //     Pt3::new(0.45, 1.0, -1.75),
+                        //     0.4,
+                        //     RGBSpectrum::new(0.0, 0.63, 0.48) * 6.0,
+                        //     sampler_kind,
+                        // )),
+                        Box::new(PolygonLight::new(
+                            square_mesh,
+                            RGBSpectrum::new(0.9, 0.64, 0.28) * 22.0,
+                        ))
                     ],
                 },
             },
@@ -338,7 +370,7 @@ impl Scene {
                     Pt3::new(0.0 - interval, ceiling, -2.0),
                 ),
                 mat: dummy_mat.clone(),
-            },            
+            },
             Triangle {
                 vertex: (
                     Pt3::new(-0.1 - interval, ceiling, -1.83),

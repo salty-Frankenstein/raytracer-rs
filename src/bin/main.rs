@@ -17,8 +17,8 @@ fn main() -> obj::ObjResult<()> {
         .map_err(parse_to_io_err)
         .and_then(SamplerKind::from_int)?;
 
-    let mut scene = Scene::light_test(light_samper);
-    // let mut scene = Scene::cornell_box(light_samper)?;
+    // let mut scene = Scene::light_test(light_samper);
+    let mut scene = Scene::cornell_box(light_samper)?;
     // let scene = Scene::blue_noise_test();
     let mut output = File::create("./output/out.ppm")?;
 
