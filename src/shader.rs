@@ -101,32 +101,8 @@ pub fn path_trace_shader_mis(r: &Ray, world: &mut World, depth: i32) -> RGBSpect
             if lrec.is_none() || lrec.unwrap().1 > rec.t {
                 let recr = &rec.clone();
                 match rec.mat {
-                    Some(m) => {
-                        let brdf = match m.scatter_d(&r, recr) {
-                            // for scatter case, the result is only dependent on the scattered ray
-                            Some(scattered) => {
-                                let li = path_trace_shader_mis(&scattered, world, depth + 1);
-                                let l_pdf = world.lights.pdf(&scattered);
-                                let b_pdf = m.pdf(r.d, scattered.d, rec.normal);
-                                mul_v(&li, &m.brdf(r.d, scattered.d, rec.normal)) / (l_pdf + b_pdf)
-                                // mul_v(&li, &m.brdf(r.d, scattered.d, rec.normal)) / (b_pdf)
-                            }
-                            None => BLACK,
-                        };
-
-                        let direct = match world.lights.visible_d(rec.p, rec.normal, &world.objects)
-                        {
-                            Some(LSampleRec { ray, radiance, p }) => {
-                                let b_pdf = m.pdf(r.d, ray.d, rec.normal);
-                                mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p + b_pdf)
-                                // mul_v(&radiance, &m.brdf(r.d, ray.d, rec.normal)) / (p)
-                            }
-                            None => BLACK,
-                        };
-                        brdf + direct 
-                        // direct
-                        // brdf
-                    }
+                    // HACK: see definition of `do_material`
+                    Some(m) => m.do_material(r, recr, world, depth),
                     None => panic!("no material"),
                 }
             } else {

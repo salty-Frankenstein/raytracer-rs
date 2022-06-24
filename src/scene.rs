@@ -52,10 +52,16 @@ impl Scene {
     pub fn cornell_box(sampler_kind: SamplerKind) -> obj::ObjResult<Scene> {
         let mut pyramid = load_obj_file(
             String::from("./input/pyramid.obj"),
-            Dielectric {ref_idx: 1.8}
+            // Dielectric {ref_idx: 1.8}
             // Metal {
             //     albedo: Vec3::new(1.0, 1.0, 1.0),
             // },
+            Microfacet {
+                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
+                roughness: 0.6,
+                metallic: 0.5,
+                attenuation: RGBSpectrum::new(0.8, 0.8, 0.8),
+            },
         )?;
         pyramid.scale(8.0);
         pyramid.rotate(0.0, -15.0, 0.0);
@@ -69,8 +75,14 @@ impl Scene {
         let mut miku2 = load_obj_file(
             String::from("./input/.miku2.obj"),
             // Dielectric{ref_idx: 1.8}
-            Metal {
-                albedo: Vec3::new(1.0, 0.7, 0.9),
+            // Metal {
+            //     albedo: Vec3::new(1.0, 0.7, 0.9),
+            // },
+            Microfacet {
+                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
+                roughness: 0.2,
+                metallic: 0.9,
+                attenuation: RGBSpectrum::new(1.0, 0.7, 0.9),
             },
         )?;
         miku2.transform(0.008, Vec3::new(0.6, -1.0, -1.3), -90.0, 0.0, -35.0);
@@ -91,7 +103,7 @@ impl Scene {
             },
         )?;
         utah.scale(0.1);
-        utah.displacement(Vec3::new(0.1, -0.5, -1.9));
+        utah.displacement(Vec3::new(0.1, -0.507, -1.9));
         let (v1, v2, v3, v4) = (
             Pt3::new(-1.0, -1.0, -1.0),
             Pt3::new(1.0, -1.0, -1.0),
@@ -146,10 +158,10 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        // Box::new(utah),
+                        Box::new(utah),
                         // Box::new(miku),
-                        // Box::new(miku2),
-                        // Box::new(miku3),
+                        Box::new(miku2),
+                        Box::new(miku3),
                         Box::new(pyramid),
                         Box::new(t1),
                         Box::new(t2),
@@ -175,7 +187,7 @@ impl Scene {
                                 f0: RGBSpectrum::new(0.98, 0.98, 0.98),
                                 roughness: 0.13,
                                 metallic: 0.9,
-                                attenuation: RGBSpectrum::new(0.8, 0.8, 0.8),
+                                attenuation: RGBSpectrum::new(0.9, 0.7, 0.4),
                             }),
                         }),
                         Box::new(Sphere {
@@ -186,9 +198,9 @@ impl Scene {
                             //     albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
                             // }),
                             mat: Rc::new(Microfacet {
-                                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
-                                roughness: 0.21,
-                                metallic: 0.9,
+                                f0: RGBSpectrum::new(0.18, 0.18, 0.18),
+                                roughness: 0.3,
+                                metallic: 0.2,
                                 attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
                             }),
                         }),
@@ -230,7 +242,7 @@ impl Scene {
                         Box::new(PolygonLight::new(
                             square_mesh,
                             RGBSpectrum::new(0.9, 0.64, 0.28) * 22.0,
-                        ))
+                        )),
                     ],
                 },
             },
