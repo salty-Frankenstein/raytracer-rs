@@ -19,6 +19,7 @@ impl Triangle {
             .normalize()
     }
 
+    // see: https://www.pbr-book.org/3ed-2018/Shapes/Triangle_Meshes#SurfaceArea
     pub fn area(&self) -> f32 {
         let c = (self.vertex.1 - self.vertex.0).cross(self.vertex.2 - self.vertex.0);
         0.5 * c.dot(c).sqrt()

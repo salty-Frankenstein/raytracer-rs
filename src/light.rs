@@ -138,6 +138,7 @@ impl DiskLight {
         res
     }
 
+    // see: https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources
     fn _pdf(&self, dir: Vec3, sq_dist: f32) -> f32 {
         let area = PI * self.radius.powi(2);
         let cosine = dir.dot(Vec3::new(0.0, 1.0, 0.0)).abs();

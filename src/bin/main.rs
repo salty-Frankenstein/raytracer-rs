@@ -18,10 +18,11 @@ fn main() -> obj::ObjResult<()> {
         .and_then(SamplerKind::from_int)?;
 
     // let mut scene = Scene::light_test(light_samper);
-    let mut scene = Scene::mis_test(light_samper);
-    // let mut scene = Scene::cornell_box(light_samper)?;
+    // let mut scene = Scene::mis_test(light_samper);
+    let mut scene = Scene::cornell_box(light_samper)?;
     // let scene = Scene::blue_noise_test();
     let mut output = File::create("./output/out.ppm")?;
+    // let mut output = File::create("./trash/out.ppm")?;
 
     writeln!(&mut output, "P3\n{} {}\n255", NX, NY)?;
     for j in (0..NY).rev() {

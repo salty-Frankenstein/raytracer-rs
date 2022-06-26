@@ -91,9 +91,9 @@ impl Scene {
             //     albedo: Vec3::new(1.0, 0.7, 0.9),
             // },
             Microfacet {
-                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
-                roughness: 0.2,
-                metallic: 0.9,
+                f0: RGBSpectrum::new(0.08, 0.08, 0.08),
+                roughness: 0.3,
+                metallic: 0.1,
                 attenuation: RGBSpectrum::new(1.0, 0.7, 0.9),
             },
         )?;
@@ -170,11 +170,11 @@ impl Scene {
             world: World {
                 objects: HitableList {
                     list: vec![
-                        Box::new(utah),
+                        // Box::new(utah),
                         // Box::new(miku),
-                        Box::new(miku2),
-                        Box::new(miku3),
-                        Box::new(pyramid),
+                        // Box::new(miku2),
+                        // Box::new(miku3),
+                        // Box::new(pyramid),
                         Box::new(t1),
                         Box::new(t2),
                         Box::new(t3),
@@ -186,36 +186,127 @@ impl Scene {
                         Box::new(t8),
                         Box::new(t9),
                         Box::new(t10),
-                        Box::new(Cylinder {
-                            center_x: 0.1,
-                            center_z: -1.95,
-                            radius: 0.4,
-                            y_max: -0.5,
-                            y_min: -1.0,
-                            // mat: Rc::new(Metal {
-                            //     albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
-                            // }),
+                        // Box::new(Cylinder {
+                        //     center_x: 0.1,
+                        //     center_z: -1.95,
+                        //     radius: 0.4,
+                        //     y_max: -0.5,
+                        //     y_min: -1.0,
+                        //     // mat: Rc::new(Metal {
+                        //     //     albedo: RGBSpectrum::new(0.9, 0.7, 0.4),
+                        //     // }),
+                        //     mat: Rc::new(Microfacet {
+                        //         f0: RGBSpectrum::new(0.98, 0.98, 0.98),
+                        //         roughness: 0.13,
+                        //         metallic: 0.9,
+                        //         attenuation: RGBSpectrum::new(0.9, 0.7, 0.4),
+                        //     }),
+                        // }),
+                        // Box::new(Sphere {
+                        //     center: Vec3::new(-0.34, 0.38, -2.0),
+                        //     radius: 0.25,
+                        //     // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
+                        //     // mat: Rc::new(Metal {
+                        //     //     albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
+                        //     // }),
+                        //     mat: Rc::new(Microfacet {
+                        //         f0: RGBSpectrum::new(0.09, 0.09, 0.59),
+                        //         roughness: 0.05,
+                        //         metallic: 0.1,
+                        //         attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
+                        //     }),
+                        // }),
+                        Box::new(Sphere {
+                            center: Vec3::new(-0.6, -0.75, -2.5),
+                            radius: 0.25,
                             mat: Rc::new(Microfacet {
-                                f0: RGBSpectrum::new(0.98, 0.98, 0.98),
-                                roughness: 0.13,
-                                metallic: 0.9,
-                                attenuation: RGBSpectrum::new(0.9, 0.7, 0.4),
+                                f0: RGBSpectrum::new(0.89, 0.89, 0.89),
+                                roughness: 0.05,
+                                metallic: 0.8,
+                                attenuation: RGBSpectrum::new(0.9, 0.7, 0.9),
                             }),
                         }),
                         Box::new(Sphere {
-                            center: Vec3::new(-0.34, 0.38, -2.0),
+                            center: Vec3::new(0.0, -0.75, -2.5),
                             radius: 0.25,
-                            // mat: Rc::new(Dielectric { ref_idx: 1.5 }),
-                            // mat: Rc::new(Metal {
-                            //     albedo: RGBSpectrum::new(0.4, 0.7, 0.9),
-                            // }),
                             mat: Rc::new(Microfacet {
-                                f0: RGBSpectrum::new(0.18, 0.18, 0.18),
-                                roughness: 0.1,
-                                metallic: 0.2,
+                                f0: RGBSpectrum::new(0.89, 0.89, 0.89),
+                                roughness: 0.2,
+                                metallic: 0.8,
                                 attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
                             }),
                         }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.6, -0.75, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.89, 0.89, 0.89),
+                                roughness: 0.5,
+                                metallic: 0.8,
+                                attenuation: RGBSpectrum::new(0.4, 0.9, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(-0.6, -0.125, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.59, 0.59, 0.59),
+                                roughness: 0.05,
+                                metallic: 0.5,
+                                attenuation: RGBSpectrum::new(0.9, 0.7, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.0, -0.125, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.59, 0.59, 0.59),
+                                roughness: 0.2,
+                                metallic: 0.5,
+                                attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.6, -0.125, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.59, 0.59, 0.59),
+                                roughness: 0.5,
+                                metallic: 0.5,
+                                attenuation: RGBSpectrum::new(0.4, 0.9, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(-0.6, 0.5, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.09, 0.09, 0.09),
+                                roughness: 0.05,
+                                metallic: 0.1,
+                                attenuation: RGBSpectrum::new(0.9, 0.7, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.0, 0.5, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.09, 0.09, 0.09),
+                                roughness: 0.2,
+                                metallic: 0.1,
+                                attenuation: RGBSpectrum::new(0.4, 0.9, 0.9),
+                            }),
+                        }),
+                        Box::new(Sphere {
+                            center: Vec3::new(0.6, 0.5, -2.5),
+                            radius: 0.25,
+                            mat: Rc::new(Microfacet {
+                                f0: RGBSpectrum::new(0.09, 0.09, 0.09),
+                                roughness: 0.5,
+                                metallic: 0.1,
+                                attenuation: RGBSpectrum::new(0.4, 0.7, 0.9),
+                            }),
+                        }),
+
                     ],
                 },
                 lights: LightList {
